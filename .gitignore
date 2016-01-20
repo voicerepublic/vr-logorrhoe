@@ -1,0 +1,27 @@
+/target
+/classes
+/checkouts
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+/.lein-*
+/.nrepl-port
+.hgignore
+.hg/
+
+#########################
+# Emacs temporary files #
+#########################
+*~
+\#*\#
+.\#*
+
+######################
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Trashes
+Thumbs.db

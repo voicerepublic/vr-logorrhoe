@@ -1,0 +1,50 @@
+* VR *re:stream*
+
+** General
+  
+This is literate documentation for the VR native streaming desktop
+application. The stack is based on
+- [[http://clojure.org/][Clojure]]
+- [[https://github.com/daveray/seesaw][seesaw]] [a LISPy Swing wrapper]
+- [[https://github.com/Chouser/clojure-jna][clojure-jna]] [Dynamically load and use native C libs from Clojure using JNA]
+
+** TODOs
+** TODO Access the mic using Java
+- Either natively
+- Or get the code from a Clojure library like [[https://github.com/overtone/overtone][Overtone]]
+
+** TODO Test streaming using [[https://github.com/OlegKunitsyn/libshout-java][libshout-java]]
+** TODO Alternatively test streaming using [[https://github.com/xiph/Icecast-libshout][native libshout library]] through
+- Either through clojure-jna or Java JNA
+
+** Development
+
+*** Package for OS X
+
+To start of packaging the Java Swing GUI for OS X, let's pack the
+whole app inside of a stand alone jar.
+
+#+BEGIN_SRC sh
+lein uberjar
+#+END_SRC sh
+
+#+RESULTS:
+| Warning: | specified                                                                                                             | :main    | without | including | it  | in      | :aot.    |           |        |      |      |      |      |
+| Implicit | AOT                                                                                                                   | of       | :main   | will      | be  | removed | in       | Leiningen | 3.0.0. |      |      |      |      |
+| If       | you                                                                                                                   | only     | need    | AOT       | for | your    | uberjar, | consider  | adding | :aot | :all | into | your |
+| :uberjar | profile                                                                                                               | instead. |         |           |     |         |          |           |        |      |      |      |      |
+| Created  | /Users/preek/src/voicerepublic/clojure_desktop_app_demo/target/clojure_desktop_app_demo-0.1.0-SNAPSHOT.jar            |          |         |           |     |         |          |           |        |      |      |      |      |
+| Created  | /Users/preek/src/voicerepublic/clojure_desktop_app_demo/target/clojure_desktop_app_demo-0.1.0-SNAPSHOT-standalone.jar |          |         |           |     |         |          |           |        |      |      |      |      |
+
+When curious, try starting the jar manually
+
+#+BEGIN_SRC sh
+java -jar target/clojure_desktop_app_demo-0.1.0-SNAPSHOT-standalone.jar
+#+END_SRC sh
+
+#+RESULTS:
+
+
+** License
+
+Copyright © 2016 Voice Republic Media AG
