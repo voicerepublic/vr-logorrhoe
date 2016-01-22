@@ -24,6 +24,13 @@ application. The stack is based on
 To start of packaging the Java Swing GUI for OS X, let's pack the
 whole app inside of a stand alone jar.
 
+To create a standalone Java Application through Leiningen, the main
+class of the program has to be put into *project.clj* as the value of
+the *:main* key. For this class to be available during the build
+process, *(:gen-class)* has to be called within the *(ns)* declaration
+of the responsible Clojure file. Documentation on how to achieve this
+can be found [[http://asymmetrical-view.com/2010/06/08/building-standalone-jars-wtih-leiningen.html][here]].
+
 #+BEGIN_SRC sh
 lein uberjar
 #+END_SRC sh
@@ -44,6 +51,10 @@ java -jar target/clojure_desktop_app_demo-0.1.0-SNAPSHOT-standalone.jar
 
 #+RESULTS:
 
+The resulting JAR file is ready to be packaged into a Mac OS X
+Installer.
+
+*** TODO Write literate documentation on how to achieve this using [[http://centerkey.com/mac/java/][this]] as reference
 
 ** License
 

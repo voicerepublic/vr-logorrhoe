@@ -17,6 +17,9 @@
      pack!
      show!)))
 
+(import java.util.Stack)
+(Stack.)
+
 ;; (-main)
 
 ;; (crazy-batshit-from-c 123)
