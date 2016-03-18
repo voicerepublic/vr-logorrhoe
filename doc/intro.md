@@ -1,3 +1,3 @@
-# Introduction to clojure_desktop_app_demo
+# Introduction
 
 TODO: write [great documentation](http://jacobian.org/writing/what-to-write/)

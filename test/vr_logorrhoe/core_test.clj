@@ -1,6 +1,6 @@
-(ns clojure-desktop-app-demo.core-test
+(ns vr-logorrhoe.core-test
   (:require [clojure.test :refer :all]
-            [clojure-desktop-app-demo.core :refer :all]))
+            [vr-logorrhoe.core :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."

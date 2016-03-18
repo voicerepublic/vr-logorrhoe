@@ -1,4 +1,4 @@
-(defproject clojure_desktop_app_demo "0.1.0-SNAPSHOT"
+(defproject vr_logorrhoe "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -7,7 +7,7 @@
                  [clj-http "2.1.0"]
                  [net.n01se/clojure-jna "1.0.0"]
                  [org.clojure/clojure "1.8.0"]]
-  :main clojure-desktop-app-demo.core
+  :main vr-logorrhoe.core
 
   :profiles
   {:project/dev { :env {:dev        true

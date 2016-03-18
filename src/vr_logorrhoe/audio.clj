@@ -1,51 +1,11 @@
-(ns clojure-desktop-app-demo.core
-  (:gen-class)
-  ;; (:use seesaw.core)
-  (:require [net.n01se.clojure-jna :as jna]
-            [clj-http.client :as client]))
-
-
-;; (defn crazy-batshit-from-c [num]
-;;   (jna/invoke Integer c/printf "The number given: %d\n" num))
-
-
-;; (defn -main [& args]
-;;   (native!)
-;;   (invoke-later
-;;     (-> (frame :title "Hello VR",
-;;            :content "Hello, VR - this is from Clojure!",
-;;            :on-close :exit)
-;;      pack!
-;;      show!)))
-
-;; (import java.util.Stack)
-;; (Stack.)
-
-;; (client/put "http://52.58.65.224/4609"
-;;              {
-;;               :basic-auth ["source" "thisisagoodpassword"]
-;;               :body (clojure.java.io/file "/home/munen/src/voicerepublic_icecast_tests/manual_put/test.ogg")
-;;               :headers {
-;;                         :user-agent "vr_shout/0.2.0"
-;;                         :ice-bitrate "128"
-;;                         :content-type "application/ogg"
-;;                         :ice-name "VR Server Name"
-;;                         :ice-genre "Rock"
-;;                         :ice-title "VR Title"
-;;                         :ice-url "https://voicerepublic.com"
-;;                         :ice-private "0"
-;;                         :ice-public "1"
-;;                         :ice-description "VR Server Description"
-;;                         :ice-audio-info "ice-samplerate=44100;ice-bitrate=128;ice-channels=2"
-;;                         }
-;;               })
-
-
-;; (-main)
-;; (crazy-batshit-from-c 112423)
-
 ;; Well written documentation on the Java Sampled Package:
 ;; http://docs.oracle.com/javase/tutorial/sound/sampled-overview.html
+
+(ns vr-logorrhoe.audio)
+
+(defn record []
+  "hallo")
+
 (import '(java.lang Thread))
 (import '(java.nio ByteBuffer ShortBuffer channels.FileChannel))
 (import '(javax.sound.sampled DataLine AudioSystem LineEvent LineListener AudioFormat))
@@ -65,7 +25,7 @@
 ;; Create a RAW file format that can be played like this:
 ;;   aplay -t raw clojure.wav -c 1 -r 44100 -f S16_LE
 ; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
-(def format (new AudioFormat 44100 16 1 true false))
+(def audio-format (new AudioFormat 44100 16 1 true false))
 (def buffer-size (* 22050 2))   ; 44k = 1/2 sec x 2 bytes / sample mono
 
 (comment
@@ -105,7 +65,7 @@
                       (. *out* (flush)))))))
 
 ; Open the port
-(. mic-line (open format buffer-size))
+(. mic-line (open audio-format buffer-size))
 
 ; Start listening to the input
 (. mic-line (start))
