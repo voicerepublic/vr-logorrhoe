@@ -1,14 +1,14 @@
 ;; Well written documentation on the Java Sampled Package:
 ;; http://docs.oracle.com/javase/tutorial/sound/sampled-overview.html
 
-(ns vr-logorrhoe.audio)
+(ns vr-logorrhoe.audio
+  (:import [java.lang Thread]
+          [java.nio ByteBuffer ShortBuffer channels.FileChannel]
+          [javax.sound.sampled DataLine AudioSystem LineEvent LineListener AudioFormat]))
 
 (defn record []
   "hallo")
 
-(import '(java.lang Thread))
-(import '(java.nio ByteBuffer ShortBuffer channels.FileChannel))
-(import '(javax.sound.sampled DataLine AudioSystem LineEvent LineListener AudioFormat))
 
 ; Supported audio filetypes
 (def filetypes (AudioSystem/getAudioFileTypes))
