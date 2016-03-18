@@ -1,7 +1,7 @@
 * VR *re:stream*
 
 ** General
-  
+
 This is literate documentation for the VR native streaming desktop
 application. The stack is based on
 - [[http://clojure.org/][Clojure]]
@@ -9,12 +9,9 @@ application. The stack is based on
 - [[https://github.com/Chouser/clojure-jna][clojure-jna]] [Dynamically load and use native C libs from Clojure using JNA]
 
 ** TODOs
-** TODO Access the mic using Java
-- Either natively
-- Or get the code from a Clojure library like [[https://github.com/overtone/overtone][Overtone]]
-
-** TODO Test streaming using [[https://github.com/OlegKunitsyn/libshout-java][libshout-java]]
-** TODO Alternatively test streaming using [[https://github.com/xiph/Icecast-libshout][native libshout library]] through
+*** Maybe not required
+**** TODO Test streaming using [[https://github.com/OlegKunitsyn/libshout-java][libshout-java]]
+**** TODO Alternatively test streaming using [[https://github.com/xiph/Icecast-libshout][native libshout library]] through
 - Either through clojure-jna or Java JNA
 
 ** Development
