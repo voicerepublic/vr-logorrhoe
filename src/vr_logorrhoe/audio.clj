@@ -1,10 +1,10 @@
-;; Well written documentation on the Java Sampled Package:
+;; Well written tutorial on the Java Sampled Package:
 ;; http://docs.oracle.com/javase/tutorial/sound/sampled-overview.html
 
 (ns vr-logorrhoe.audio
   (:import [java.lang Thread]
-          [java.nio ByteBuffer ShortBuffer channels.FileChannel]
-          [javax.sound.sampled DataLine AudioSystem LineEvent LineListener AudioFormat]))
+          [java.nio ByteBuffer ShortBuffer]
+          [javax.sound.sampled DataLine AudioSystem LineEvent LineListener AudioFormat Port$Info]))
 
 (defn record []
   "hallo")
@@ -16,6 +16,27 @@
 ; Supported mixers
 (def mixer-info (seq (. AudioSystem (getMixerInfo))))
 
+;; (def mixer (AudioSystem/getMixer nil))
+
+;; (def lineIn (.getLine mixer Port$Info/LINE_IN))
+
+;; (def line-capabilities
+;;     [Port$Info/COMPACT_DISC Port$Info/HEADPHONE Port$Info/LINE_IN Port$Info/LINE_OUT Port$Info/MICROPHONE Port$Info/SPEAKER])
+
+;; (defn show-capabilities [mic]
+;;   (for [cap line-capabilities]
+;;     (try
+;;       (.isLineSupported mic cap)
+;;       (catch Exception e (str "Exception: " (.getMessage e))))))
+
+;; (map #(let [mixer (AudioSystem/getMixer %)]
+;;         (try
+;;           ;; (.getLine % Port$Info/MICROPHONE)
+;;           (print (. % (getName)))
+;;           (show-capabilities mixer)
+;;           (catch Exception e (str "Execption: " (.getMessage e)))))
+;;      mixer-info)
+
 ; Get mixer-info, name, description of each mixer
 (def mixer-info-list
   (map #(let [m %] {:mixer-info m
@@ -26,7 +47,9 @@
 ;;   aplay -t raw clojure.wav -c 1 -r 44100 -f S16_LE
 ; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
 (def audio-format (new AudioFormat 44100 16 1 true false))
-(def buffer-size (* 22050 2))   ; 44k = 1/2 sec x 2 bytes / sample mono
+
+; 44k = 1/2 sec x 2 bytes / sample mono
+(def buffer-size (* 22050 2))
 
 (comment
 
@@ -37,6 +60,7 @@
 
 ;; Get the built in mic mixer
 (def mic (. AudioSystem (getMixer mic-mixer-info)))
+
 
 ;; Get the supported source and target lines for the mixer
 (def sources (seq (. mic (getSourceLineInfo))))
@@ -50,10 +74,6 @@
                    (catch Exception e
                      (println "Exception: " e)
                      false))))
-
-;; Cannot get Port.Info to be imported properly. Otherwise this would
-;; kinda be the way to check for attributes.
-;; (.isLineSupported AudioSystem Port.Info.MICROPHONE)
 
 ; Add a line listener for events on the line. This is purely
 ; optional.
