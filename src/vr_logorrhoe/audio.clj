@@ -13,29 +13,20 @@
 ; Supported audio filetypes
 (def filetypes (AudioSystem/getAudioFileTypes))
 
+;; Potential recording lines
+;; Note: This actually returns an empty list on my Linux. On the Mac,
+;; it returns the MIC. The Line-In so far was never returned, even
+;; with the USB Interface connected.
+(def recording-lines
+  (filter (fn [x]
+            (not ( nil? x)))
+            (map #(if (AudioSystem/isLineSupported %)
+                    %)
+                 [Port$Info/LINE_IN Port$Info/MICROPHONE])))
+
 ; Supported mixers
 (def mixer-info (seq (. AudioSystem (getMixerInfo))))
 
-;; (def mixer (AudioSystem/getMixer nil))
-
-;; (def lineIn (.getLine mixer Port$Info/LINE_IN))
-
-;; (def line-capabilities
-;;     [Port$Info/COMPACT_DISC Port$Info/HEADPHONE Port$Info/LINE_IN Port$Info/LINE_OUT Port$Info/MICROPHONE Port$Info/SPEAKER])
-
-;; (defn show-capabilities [mic]
-;;   (for [cap line-capabilities]
-;;     (try
-;;       (.isLineSupported mic cap)
-;;       (catch Exception e (str "Exception: " (.getMessage e))))))
-
-;; (map #(let [mixer (AudioSystem/getMixer %)]
-;;         (try
-;;           ;; (.getLine % Port$Info/MICROPHONE)
-;;           (print (. % (getName)))
-;;           (show-capabilities mixer)
-;;           (catch Exception e (str "Execption: " (.getMessage e)))))
-;;      mixer-info)
 
 ; Get mixer-info, name, description of each mixer
 (def mixer-info-list
