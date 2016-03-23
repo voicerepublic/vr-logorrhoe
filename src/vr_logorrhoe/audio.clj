@@ -3,21 +3,25 @@
 
 (ns vr-logorrhoe.audio
   (:import [java.lang Thread]
-          [java.nio ByteBuffer ShortBuffer]
-          [javax.sound.sampled DataLine AudioSystem LineEvent LineListener AudioFormat Port$Info]))
+           [java.nio ByteBuffer ShortBuffer]
+           [javax.sound.sampled DataLine AudioSystem AudioFileFormat$Type
+            LineEvent LineListener AudioFormat Port$Info]))
+
 
 (defn record []
   "hallo")
 
-
 ; Supported audio filetypes
 (def filetypes (AudioSystem/getAudioFileTypes))
+
+(def is-wave-supported?
+  (AudioSystem/isFileTypeSupported AudioFileFormat$Type/WAVE))
 
 ;; Potential recording lines
 ;; Note: This actually returns an empty list on my Linux. On the Mac,
 ;; it returns the MIC. The Line-In so far was never returned, even
 ;; with the USB Interface connected.
-(def recording-lines
+(defn get-recording-lines []
   (filter (fn [x]
             (not ( nil? x)))
             (map #(if (AudioSystem/isLineSupported %)
@@ -27,14 +31,13 @@
 ; Supported mixers
 (def mixer-info (seq (. AudioSystem (getMixerInfo))))
 
-
 ; Get mixer-info, name, description of each mixer
 (def mixer-info-list
   (map #(let [m %] {:mixer-info m
                     :name (. m (getName))
                     :description (. m (getDescription))}) mixer-info))
 
-;; Create a RAW file format that can be played like this:
+;; Create a RAW data format. It can be played like this:
 ;;   aplay -t raw clojure.wav -c 1 -r 44100 -f S16_LE
 ; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
 (def audio-format (new AudioFormat 44100 16 1 true false))
@@ -86,6 +89,12 @@
 ;; http://www.java2s.com/Tutorials/Java/IO/NIO_Buffer/Save_ByteBuffer_to_a_file_in_Java.htm
 (def fc (.getChannel (java.io.FileOutputStream. "clojure.wav")))
 
+;; This should convert audio to a specific format. However, I'm
+;; getting an error. This is the doc:
+;; http://docs.oracle.com/javase/tutorial/sound/converters.html
+;; (def output-file (new java.io.File "clojure.wave"))
+;; (.write AudioSystem bbyte AudioFileFormat$Type/WAVE output-file)
+
 ; try looping and counting available samples
 ; 1 milli sleep = 1/1000 of a sec = 44 samples
 (dotimes [i 100]
@@ -100,6 +109,7 @@
     ;; (print " ... Converted to short: "  (str (. bshort (get 0))))
     )
   (. Thread (sleep 20)))
+
 
 (.close fc)
 

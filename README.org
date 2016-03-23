@@ -9,6 +9,21 @@ application. The stack is based on
 - [[https://github.com/Chouser/clojure-jna][clojure-jna]] [Dynamically load and use native C libs from Clojure using JNA]
 
 ** TODOs
+*** TODO Integrate a Vorbis Encoder
+
+**** [[http://svn.xiph.org/trunk/vorbis-java/][vorbis-java]]
+     This is the official Java lib from Xiph, the creators of Ogg
+     Vorbis.
+
+     Unfortunately, though, it hasn't been updated since 2007, is
+still in Beta and not available from Maven. For a manual install,
+package the Class files with *jar cf something.jar [files]* and then
+create a local Maven Repo for Leiningen: http://www.elangocheran.com/blog/2013/03/installing-jar-files-locally-for-leiningen-2/
+
+     Note that putting a Jar into */lib* or using *:resource-paths* in
+     project.clj doesn't seem to be the way to go since Leiningen 2.
+
+
 *** Maybe not required
 **** TODO Test streaming using [[https://github.com/OlegKunitsyn/libshout-java][libshout-java]]
 **** TODO Alternatively test streaming using [[https://github.com/xiph/Icecast-libshout][native libshout library]] through
