@@ -8,12 +8,45 @@ application. The stack is based on
 - [[https://github.com/daveray/seesaw][seesaw]] [a LISPy Swing wrapper]
 - [[https://github.com/Chouser/clojure-jna][clojure-jna]] [Dynamically load and use native C libs from Clojure using JNA]
 
+** libshout-java
+
+*** Install
+    Tested on Debian Jessie
+
+**** Checkout libshout-java
+#+BEGIN_SRC shell
+apt-get install git libshout3-dev maven
+git clone https://github.com/OlegKunitsyn/libshout-java.git
+cd libshout-java
+#+END_SRC
+
+**** Fix a test (otherwise it will not install)
+
+ - Fix the test /testVersion()/ in
+   /src/test/java/com/gmail/kunicins/olegs/libshout/LibshoutTest.java/ to
+   check for your installed version of libshout
+ - It's tested and working with version 2.3.1
+ - Find your version via
+
+#+BEGIN_SRC shell
+pt-cache show libshout3-dev | ag version | egrep -o "2.[0-9].[0-9]"
+#+END_SRC
+
+  - Then install the library to your local maven repository so that
+    `lein deps` can find it
+
+#+BEGIN_SRC shell
+mvn install
+#+END_SRC
+
+**** TODO Move this compiled Library to a HTTP repo so that not every user has to install it to a local repo
+
 ** TODOs
 *** TODO Integrate a Vorbis Encoder
 
 **** [[http://svn.xiph.org/trunk/vorbis-java/][vorbis-java]]
      This is the official Java lib from Xiph, the creators of Ogg
-     Vorbis.
+     Vorbis. It has example source and even a port of the libshout lib.
 
      Unfortunately, though, it hasn't been updated since 2007, is
 still in Beta and not available from Maven. For a manual install,
