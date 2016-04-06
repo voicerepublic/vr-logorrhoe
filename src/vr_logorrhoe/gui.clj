@@ -3,6 +3,12 @@
   (:use seesaw.core
         seesaw.font))
 
+(def app-state (atom {:recording false}))
+
+(def icons {:rec  "resources/rec.png"
+            :stop "resources/stop.png"
+            :logo "resources/logo.png"})
+
 ;; Helpers
 (native!)
 
@@ -28,15 +34,17 @@
   (config f :title)
 
   (let [logo (label
-              :icon (java.io.File. "resources/logo.png"))
+              :halign :right
+              :icon (java.io.File. (:logo icons)))
         title (label
-             :text "VR - *re:stream* - Venue Title"
-             :font (font :name :monospaced
-                         :style #{:bold}
-                         :size 34))
-        b   (button :text "Start")
+               :text "VR - *re:stream* - Venue Title"
+               :font (font :name :monospaced
+                           :style #{:bold}
+                           :size 34))
+        btn (label
+             :icon (java.io.File. (:rec icons)))
         audio-inputs (listbox :model ["Microphone" "Line-In"])
-        split (left-right-split (scrollable audio-inputs) b :divider-location 1/3)]
+        split (left-right-split (scrollable audio-inputs) btn :divider-location 1/3)]
 
     (display (border-panel
               :north (horizontal-panel :items [logo (label :text "       ") title])
@@ -50,8 +58,14 @@
               (when-let [s (selection e)]
                 (alert (selection e)))))
 
-    (listen b :action (fn[e]
-                        (alert e "Started!")
-                        (config! b :text "Stop")))))
+    (listen btn :mouse-clicked (fn[e]
+                                 (swap! app-state
+                                        assoc :recording
+                                        (not (:recording @app-state)))
+                                 (config! btn
+                                          :icon (java.io.File. (if (:recording @app-state)
+                                                                 (:stop icons)
+                                                                 (:rec icons))))))))
+
 
 (start)
