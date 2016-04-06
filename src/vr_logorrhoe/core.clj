@@ -6,9 +6,7 @@
 
             [clj-http.client :as client]
             [vr-logorrhoe.gui :as gui]
-            [vr-logorrhoe.audio :refer [record]]))
-
-
+            [vr-logorrhoe.sound-input :as sound-input]))
 
 (defn -main [& args]
   (gui/start))

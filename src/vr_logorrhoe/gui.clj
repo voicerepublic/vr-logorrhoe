@@ -1,7 +1,8 @@
 (ns vr-logorrhoe.gui
   (:gen-class)
   (:use seesaw.core
-        seesaw.font))
+        seesaw.font
+        seesaw.chooser))
 
 (def app-state (atom {:recording false}))
 
@@ -17,10 +18,20 @@
                   :name "Exit"
                   :tip  "Close this window"))
 
+(def backup-folder-action (action
+                           :handler (fn [e]
+                                      (choose-file :remember-directory? true
+                                                   :selection-mode :dirs-only
+                                                   :success-fn (fn [fc file]
+                                                                 (alert (str "Selected: " (.getAbsolutePath file))))))
+                           :name "Choose Backup Folder"
+                           :tip  "Choose Backup Folder"))
+
+
 (def f (frame :title "VR - *re:stream*"
               :menubar
               (menubar :items
-                       [(menu :text "File" :items [exit-action])
+                       [(menu :text "File" :items [backup-folder-action exit-action])
                         (menu :text "Help" :items [exit-action])])))
 
 (defn display [content]
@@ -34,7 +45,6 @@
   (config f :title)
 
   (let [logo (label
-              :halign :right
               :icon (java.io.File. (:logo icons)))
         title (label
                :text "VR - *re:stream* - Venue Title"
@@ -68,4 +78,4 @@
                                                                  (:rec icons))))))))
 
 
-(start)
+;; (start)
