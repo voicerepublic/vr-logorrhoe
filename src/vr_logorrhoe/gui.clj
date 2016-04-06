@@ -23,15 +23,14 @@
 
 
 (defn start []
-  (-> f pack! show! )
+  (invoke-later
+   (-> f pack! show! ))
   (config f :title)
 
   (let [logo (label
               :icon (java.io.File. "resources/logo.png"))
         title (label
              :text "VR - *re:stream* - Venue Title"
-             :background :lightgrey
-             :foreground "#00f"
              :font (font :name :monospaced
                          :style #{:bold}
                          :size 34))

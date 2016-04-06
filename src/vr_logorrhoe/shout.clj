@@ -7,7 +7,7 @@
 (def libshout (com.gmail.kunicins.olegs.libshout.Libshout.))
 (.getVersion libshout)
 
-(def buffer (make-array (. Byte TYPE) 1024) )
+(def buffer (make-array (. Byte TYPE) 4150) )
 
 (def input-stream (new java.io.BufferedInputStream (new java.io.FileInputStream (new java.io.File "/home/munen/src/voicerepublic_icecast_tests/clients/test.mp3"))))
 
