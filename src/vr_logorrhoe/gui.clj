@@ -2,7 +2,8 @@
   (:gen-class)
   (:use seesaw.core
         seesaw.font
-        seesaw.chooser))
+        seesaw.chooser)
+  (:require [vr-logorrhoe.sound-input :as sound-input]))
 
 (def app-state (atom {:recording false}))
 
@@ -13,11 +14,15 @@
 ;; Helpers
 (native!)
 
+(def help-action (action
+                  :handler (fn [e] (clojure.java.browse/browse-url "http://voicerepublic.com"))
+                  :name "Documentation"
+                  :tip  "Open Documentation"))
+
 (def exit-action (action
                   :handler (fn [e] (.dispose (to-frame e)))
                   :name "Exit"
                   :tip  "Close this window"))
-
 (def backup-folder-action (action
                            :handler (fn [e]
                                       (choose-file :remember-directory? true
@@ -32,7 +37,7 @@
               :menubar
               (menubar :items
                        [(menu :text "File" :items [backup-folder-action exit-action])
-                        (menu :text "Help" :items [exit-action])])))
+                        (menu :text "Help" :items [help-action])])))
 
 (defn display [content]
   (config! f :content content)
