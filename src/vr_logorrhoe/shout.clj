@@ -3,27 +3,41 @@
 
 (ns vr-logorrhoe.shout)
 
+(def shout-config (atom {:host "52.58.65.224"
+                         :port 80
+                         :password "thisisagoodpassword"
+                         :mount "/4609"}))
 
 (def libshout (com.gmail.kunicins.olegs.libshout.Libshout.))
-(.getVersion libshout)
+;; (.getVersion libshout)
 
-(def buffer (make-array (. Byte TYPE) 4150) )
+(defn connect []
+  (.setHost libshout (:host @shout-config))
+  (.setPort libshout (:port @shout-config))
+  (.setProtocol libshout com.gmail.kunicins.olegs.libshout.Libshout/PROTOCOL_HTTP)
+  (.setPassword libshout (:password @shout-config))
+  (.setMount libshout (:mount @shout-config))
+  (.setFormat libshout com.gmail.kunicins.olegs.libshout.Libshout/FORMAT_MP3)
+  (.open libshout ))
 
-(def input-stream (new java.io.BufferedInputStream (new java.io.FileInputStream (new java.io.File "/home/munen/src/voicerepublic_icecast_tests/clients/test.mp3"))))
+(defn stream [input-stream]
+  (let [buffer (make-array (. Byte TYPE) 4150)]
+    (loop []
+      (let [size (.read input-stream buffer)]
+        (when (> size )
+          (.send libshout buffer size)
+          (recur)))))
+  (.close input-stream))
 
-(.setHost libshout "52.58.65.224")
-(.setPort libshout 80)
-(.setProtocol libshout com.gmail.kunicins.olegs.libshout.Libshout/PROTOCOL_HTTP)
-(.setPassword libshout "thisisagoodpassword")
-(.setMount libshout "/4609")
-(.setFormat libshout com.gmail.kunicins.olegs.libshout.Libshout/FORMAT_MP3)
-(.open libshout )
+(defn disconnect []
+  (.close libshout))
 
-(loop []
-  (let [size (.read input-stream buffer)]
-    (when (> size )
-      (.send libshout buffer size)
-      (recur))))
+(comment
+  (let [test-input-stream (new java.io.BufferedInputStream
+                               (new java.io.FileInputStream
+                                    (new java.io.File
+                                         "/home/munen/src/voicerepublic_icecast_tests/clients/test.mp3")))]
 
-(.close libshout)
-(.close input-stream)
+    (connect)
+    (stream test-input-stream)
+    (disconnect)))
