@@ -44,6 +44,21 @@
   (config! f :content content)
   content)
 
+;; TODO: Generalise the creation of the audio settings combo-boxes
+;; TODO: Add the other audio-format configuration parameters
+;; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
+(def audio-sample-freq-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
+;; TODO: Why is the `map` not working?
+;; (map #(.addItem audio-sample-freq-combo-box %) ["22050" "44100" "48000"])
+(.addItem audio-sample-freq-combo-box "22050")
+(.addItem audio-sample-freq-combo-box "44100")
+(.addItem audio-sample-freq-combo-box "48000")
+(.setSelectedIndex audio-sample-freq-combo-box 1)
+
+(def audio-sample-size-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
+(.addItem audio-sample-size-combo-box "16")
+(.addItem audio-sample-size-combo-box "24")
+(.addItem audio-sample-size-combo-box "32")
 
 (defn start []
   (invoke-later
@@ -60,12 +75,18 @@
         btn (label
              :icon (java.io.File. (:rec icons)))
         audio-inputs (listbox :model (sound-input/get-mixer-names))
-        left-main (top-bottom-split (listbox :model ["a" "b"]) (scrollable audio-inputs))
+        audio-sample-freq (left-right-split (label :text "Frequency")
+                                            audio-sample-freq-combo-box)
+        audio-sample-size (left-right-split (label :text "Sample Size")
+                                            audio-sample-size-combo-box)
+        audio-format (flow-panel
+                      ;; :align :left
+                      :hgap 20
+                      :items [audio-sample-freq
+                              audio-sample-size])
+        left-main (top-bottom-split audio-format
+                                    (scrollable audio-inputs))
         main (left-right-split left-main btn :divider-location 1/3)]
-
-
-
-    ;; (def audio-format (new AudioFormat 44100 16 1 true false))
 
     (display (border-panel
               :north (horizontal-panel :items [logo (label :text "       ") title])
@@ -74,10 +95,17 @@
               :vgap 5 :hgap 5 :border 5))
 
     ;; Register actions
-    (listen audio-inputs :selection
-            (fn[e]
-              (when-let [s (selection e)]
-                (alert (selection e)))))
+    (listen audio-inputs :selection (fn[e]
+                                      (when-let [s (selection e)]
+                                        (alert (selection e)))))
+
+    (listen audio-sample-freq-combo-box :selection (fn[e]
+                                                     (when-let [s (selection e)]
+                                                       (alert s))))
+
+    (listen audio-sample-size-combo-box :selection (fn[e]
+                                                     (when-let [s (selection e)]
+                                                       (alert s))))
 
     (listen btn :mouse-clicked (fn[e]
                                  (swap! app-state
