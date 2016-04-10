@@ -3,7 +3,8 @@
   (:use seesaw.core
         seesaw.font
         seesaw.chooser)
-  (:require [vr-logorrhoe.sound-input :as sound-input]))
+  (:require [vr-logorrhoe.sound-input :as sound-input]
+            [clojure.java.browse :refer [browse-url]]))
 
 (def app-state (atom {:recording false}))
 
@@ -15,7 +16,7 @@
 (native!)
 
 (def help-action (action
-                  :handler (fn [e] (clojure.java.browse/browse-url "http://voicerepublic.com"))
+                  :handler (fn [e] (browse-url "http://voicerepublic.com"))
                   :name "Documentation"
                   :tip  "Open Documentation"))
 

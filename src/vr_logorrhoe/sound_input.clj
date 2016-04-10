@@ -101,11 +101,7 @@
   ;; (def output-file (new java.io.File "clojure.wave"))
   ;; (.write AudioSystem bbyte AudioFileFormat$Type/WAVE output-file)
 
-                                        ; try looping and counting available samples
-                                        ; 1 milli sleep = 1/1000 of a sec = 44 samples
   (dotimes [i 10]
-    ;; (print "Available data: " (. recorder-line (available)))
-    ;; (. *out* (flush))
     (let [;tmp-fc  (.getChannel (java.io.FileOutputStream. "tmp.wav"))
           buffer  (make-array (. Byte TYPE) buffer-size)
           bcount  (. recorder-line (read buffer 0 buffer-size))
@@ -132,6 +128,10 @@
       ;; (clojure.java.shell/sh "sh" "-c" "lame -r -s 44.1 --bitwidth 16 --signed --little-endian -m m tmp.wav foo.mp3")
       ;; (print "Read: " bcount " bytes. Buffer state:" (str bshort))
       ;; (print " ... Converted to short: "  (str (. bshort (get 0))))
+
+      ;; TODO: Call the `drain` method to drain the recorder-line when
+      ;; the recording stops. Otherwise the recorded data might seem
+      ;; to end pre-maturely.
       )
     (. Thread (sleep 20)))
 
