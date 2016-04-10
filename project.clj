@@ -11,9 +11,4 @@
   :main vr-logorrhoe.core
 
   :repositories [["sonatype" "http://oss.sonatype.org/content/repositories/releases"]
-                 ["central" "http://mirrors.ibiblio.org/pub/mirrors/maven2"]]
-
-  :profiles
-  {:project/dev { :env {:dev        true
-                        :port       3000
-                        :nrepl-port 7000}}})
+                 ["central" "http://mirrors.ibiblio.org/pub/mirrors/maven2"]])

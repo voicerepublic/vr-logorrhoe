@@ -108,13 +108,13 @@
                                                        (alert s))))
 
     (listen btn :mouse-clicked (fn[e]
-                                 (swap! app-state
-                                        assoc :recording
-                                        (not (:recording @app-state)))
                                  (config! btn
                                           :icon (java.io.File. (if (:recording @app-state)
                                                                  (:stop icons)
-                                                                 (:rec icons))))))))
+                                                                 (:rec icons))))
+                                 (swap! app-state
+                                        assoc :recording
+                                        (not (:recording @app-state)))))))
 
 
 ;; (start)
