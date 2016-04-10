@@ -77,16 +77,17 @@
 ;; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
 (def audio-format (new AudioFormat 44100 16 1 true false))
 
-;; 44k = 1/2 sec x 2 bytes / sample mono
-(def buffer-size (* 22050 2))
-
+;; The size of the buffer is deliberately 1/5th of the lines
+;; buffer. Otherwise there's a racing condition between the mixer
+;; writing to and this code reading from the buffer.
+(def buffer-size (int (/ (.getBufferSize recorder-line) 5)))
 
 (defn record[]
 
-  ;; Open the port
+  ;; Open the Port
   (. recorder-line (open audio-format buffer-size))
 
-                                        ; Start listening to the input
+  ;; Start Audio Capture
   (. recorder-line (start))
 
   ;; The Input Port will yield a `ByteBuffer`. Saving those cannot just be
@@ -102,16 +103,17 @@
 
                                         ; try looping and counting available samples
                                         ; 1 milli sleep = 1/1000 of a sec = 44 samples
-  (dotimes [i 100]
+  (dotimes [i 10]
     ;; (print "Available data: " (. recorder-line (available)))
     ;; (. *out* (flush))
     (let [;tmp-fc  (.getChannel (java.io.FileOutputStream. "tmp.wav"))
-          buffer  (make-array (. Byte TYPE) 4048)
-          bcount  (. recorder-line (read buffer 0 4048))
+          buffer  (make-array (. Byte TYPE) buffer-size)
+          bcount  (. recorder-line (read buffer 0 buffer-size))
           bbyte   (. ByteBuffer (wrap buffer))
           bshort  (. bbyte (asShortBuffer))]
 
       (.write fc bbyte)
+      (println "bsize: " buffer-size)
 
 
       ;; (.write tmp-fc bbyte)
