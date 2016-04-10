@@ -8,140 +8,142 @@
             LineEvent LineListener AudioFormat Port$Info]))
 
 
-(defn record []
-  "hallo")
+(comment
+  ;; Supported audio filetypes
+  (def filetypes (AudioSystem/getAudioFileTypes))
 
-; Supported audio filetypes
-(def filetypes (AudioSystem/getAudioFileTypes))
+  (def is-wave-supported?
+    (AudioSystem/isFileTypeSupported AudioFileFormat$Type/WAVE))
+  )
 
-(def is-wave-supported?
-  (AudioSystem/isFileTypeSupported AudioFileFormat$Type/WAVE))
+;; Supported mixers
+;; Note: It would be possible to check for LINE_IN and MICROPHONE
+;; directly using
+;; (AudioSystem/isLineSupported Port$Info/LINE_IN)
+;; and
+;; (AudioSystem/getLine Port$Info/LINE_IN)
+;; However, this does not always return a line with said capability
+;; (seen in Debian 8). Therefore, we're using the method to request a
+;; line via the Mixer.
+(defn get-mixer-info []
+  (seq (. AudioSystem (getMixerInfo))))
 
-;; Potential recording lines
-;; Note: This actually returns an empty list on my Linux. On the Mac,
-;; it returns the MIC. The Line-In so far was never returned, even
-;; with the USB Interface connected.
-(defn get-recording-lines []
-  (filter (fn [x]
-            (not ( nil? x)))
-            (map #(if (AudioSystem/isLineSupported %)
-                    %)
-                 [Port$Info/LINE_IN Port$Info/MICROPHONE])))
 
-; Supported mixers
-(def mixer-info (seq (. AudioSystem (getMixerInfo))))
-
-; Get mixer-info, name, description of each mixer
-(def mixer-info-list
+;; Get mixer-info, name, description of each mixer
+(defn get-mixer-infos []
   (map #(let [m %] {:mixer-info m
                     :name (. m (getName))
-                    :description (. m (getDescription))}) mixer-info))
+                    :description (. m (getDescription))})
+       (get-mixer-info)))
 
-;; Create a RAW data format. It can be played like this:
-;;   aplay -t raw clojure.wav -c 1 -r 44100 -f S16_LE
-; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
-(def audio-format (new AudioFormat 44100 16 1 true false))
+;; This method is called by the GUI to query for available mixers
+(defn get-mixer-names []
+  "Retrieve all available mixers by name"
+  (map :name (get-mixer-infos)))
 
-; 44k = 1/2 sec x 2 bytes / sample mono
-(def buffer-size (* 22050 2))
+;; Get the mixer info for the recorder
+(defn get-recorder-mixer-info [recorder-name]
+  (:mixer-info (first (filter #(= recorder-name (:name %)) (get-mixer-infos)))))
 
-(comment
+;; TODO: !! This is hard-coded for my machine right now. !!
+(def recorder-mixer-info
+  (get-recorder-mixer-info "Intel [plughw:0,1]"))
 
-;; Get the mixer info for the mic
-;; (map #(:name %) mixer-info-list)
-(def mic-mixer-info
-  (:mixer-info (first (filter #(= "Intel [plughw:0,1]" (:name %)) mixer-info-list))))
+;; Get the recorder mixer
+(def recorder-mixer (. AudioSystem (getMixer recorder-mixer-info)))
 
-;; Get the built in mic mixer
-(def mic (. AudioSystem (getMixer mic-mixer-info)))
-
-
-;; Get the supported source and target lines for the mixer
-(def sources (seq (. mic (getSourceLineInfo))))
-(def targets (seq (. mic (getTargetLineInfo))))
+;; Get the supported target line for the mixer
+(def line-info (first (seq (. recorder-mixer (getTargetLineInfo)))))
 
 ; Get a target line
-(def line-info (first targets))
-(def mic-line (try
-                (. mic
+(def recorder-line (try
+                (. recorder-mixer
                    (getLine line-info)
                    (catch Exception e
-                     (println "Exception: " e)
+                     (println "Exception with getting the line for mixer: " e)
                      false))))
 
-; Add a line listener for events on the line. This is purely
-; optional.
-(. mic-line (addLineListener
+;; Add a line listener for events on the line. This is an optional step
+;; and will be purely used for logging purposes.
+(. recorder-line (addLineListener
              (reify LineListener
                 (update [this evt]
                   (do (print "Event: " (. evt (getType)))
                       (newline)
                       (. *out* (flush)))))))
 
-; Open the port
-(. mic-line (open audio-format buffer-size))
+;; Create a RAW data format. It can be played like this:
+;;   aplay -t raw clojure.wav -c 1 -r 44100 -f S16_LE
+;; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
+(def audio-format (new AudioFormat 44100 16 1 true false))
 
-; Start listening to the input
-(. mic-line (start))
-
-;; The Input Port will yield a `ByteBuffer`. Saving those cannot just be
-;; done with 'spit'. However, they can be saved with a `FileChannel`.
-;; http://www.java2s.com/Tutorials/Java/IO/NIO_Buffer/Save_ByteBuffer_to_a_file_in_Java.htm
-(def fc (.getChannel (java.io.FileOutputStream. "clojure.wav")))
-
-;; This should convert audio to a specific format. However, I'm
-;; getting an error. This is the doc:
-;; http://docs.oracle.com/javase/tutorial/sound/converters.html
-;; (def output-file (new java.io.File "clojure.wave"))
-;; (.write AudioSystem bbyte AudioFileFormat$Type/WAVE output-file)
-
-; try looping and counting available samples
-; 1 milli sleep = 1/1000 of a sec = 44 samples
-(dotimes [i 1]
-  ;; (print "Available data: " (. mic-line (available)))
-  ;; (. *out* (flush))
-  (let [tmp-fc  (.getChannel (java.io.FileOutputStream. "tmp.wav"))
-        buffer  (make-array (. Byte TYPE) 40480)
-        bcount  (. mic-line (read buffer 0 40480))
-        bbyte   (. ByteBuffer (wrap buffer))
-        bshort  (. bbyte (asShortBuffer))]
-    (.write tmp-fc bbyte)
+;; 44k = 1/2 sec x 2 bytes / sample mono
+(def buffer-size (* 22050 2))
 
 
+(defn record[]
 
-    ;; TODO: THIS IS GOING TO BE A WEIRD ATTEMPT OF LIVE ENCODING
-    ;; FRAGMENTS AND SENDING THOSE TO THE ICECAST SERVER. USE WITH
-    ;; CAUTION, THIS MIGHT NOT WORK.
-    ;; If it does, however, it will save us from having to import a
-    ;; mp3 encoding lib that supports streaming
+  ;; Open the port
+  (. recorder-line (open audio-format buffer-size))
+
+                                        ; Start listening to the input
+  (. recorder-line (start))
+
+  ;; The Input Port will yield a `ByteBuffer`. Saving those cannot just be
+  ;; done with 'spit'. However, they can be saved with a `FileChannel`.
+  ;; http://www.java2s.com/Tutorials/Java/IO/NIO_Buffer/Save_ByteBuffer_to_a_file_in_Java.htm
+  (def fc (.getChannel (java.io.FileOutputStream. "clojure.wav")))
+
+  ;; This should convert audio to a specific format. However, I'm
+  ;; getting an error. This is the doc:
+  ;; http://docs.oracle.com/javase/tutorial/sound/converters.html
+  ;; (def output-file (new java.io.File "clojure.wave"))
+  ;; (.write AudioSystem bbyte AudioFileFormat$Type/WAVE output-file)
+
+                                        ; try looping and counting available samples
+                                        ; 1 milli sleep = 1/1000 of a sec = 44 samples
+  (dotimes [i 100]
+    ;; (print "Available data: " (. recorder-line (available)))
+    ;; (. *out* (flush))
+    (let [;tmp-fc  (.getChannel (java.io.FileOutputStream. "tmp.wav"))
+          buffer  (make-array (. Byte TYPE) 4048)
+          bcount  (. recorder-line (read buffer 0 4048))
+          bbyte   (. ByteBuffer (wrap buffer))
+          bshort  (. bbyte (asShortBuffer))]
+
+      (.write fc bbyte)
 
 
-
-    (.close tmp-fc)
-    (clojure.java.shell/sh "sh" "-c" "lame -r -s 44.1 --bitwidth 16 --signed --little-endian -m m tmp.wav foo.mp3")
-    ;; (print "Read: " bcount " bytes. Buffer state:" (str bshort))
-    ;; (print " ... Converted to short: "  (str (. bshort (get 0))))
-    )
-  (. Thread (sleep 20)))
-
-(.close fc)
-
-; stop the input
-;(. mic-line (stop))
-
-; close mic
-;(. mic-line (close))
-
-
-)
+      ;; (.write tmp-fc bbyte)
 
 
 
+      ;; TODO: THIS IS GOING TO BE A WEIRD ATTEMPT OF LIVE ENCODING
+      ;; FRAGMENTS AND SENDING THOSE TO THE ICECAST SERVER. USE WITH
+      ;; CAUTION, THIS MIGHT NOT WORK.
+      ;; If it does, however, it will save us from having to import a
+      ;; mp3 encoding lib that supports streaming
 
 
 
+      ;; (.close tmp-fc)
+      ;; (clojure.java.shell/sh "sh" "-c" "lame -r -s 44.1 --bitwidth 16 --signed --little-endian -m m tmp.wav foo.mp3")
+      ;; (print "Read: " bcount " bytes. Buffer state:" (str bshort))
+      ;; (print " ... Converted to short: "  (str (. bshort (get 0))))
+      )
+    (. Thread (sleep 20)))
+
+  (.close fc)
+
+  ;; stop the input
+  (. recorder-line (stop))
+
+  ;; close recorder
+  (. recorder-line (close)))
 
 
+
+;; (record)
 
 
 ;; (client/put "http://52.58.65.224/4609"

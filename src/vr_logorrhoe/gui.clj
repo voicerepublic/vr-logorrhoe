@@ -58,13 +58,18 @@
                            :size 34))
         btn (label
              :icon (java.io.File. (:rec icons)))
-        audio-inputs (listbox :model ["Microphone" "Line-In"])
-        split (left-right-split (scrollable audio-inputs) btn :divider-location 1/3)]
+        audio-inputs (listbox :model (sound-input/get-mixer-names))
+        left-main (top-bottom-split (listbox :model ["a" "b"]) (scrollable audio-inputs))
+        main (left-right-split left-main btn :divider-location 1/3)]
+
+
+
+    ;; (def audio-format (new AudioFormat 44100 16 1 true false))
 
     (display (border-panel
               :north (horizontal-panel :items [logo (label :text "       ") title])
               :south (label :text "Brought to you via voicerepublic.com")
-              :center split
+              :center main
               :vgap 5 :hgap 5 :border 5))
 
     ;; Register actions
