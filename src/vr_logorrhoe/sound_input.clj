@@ -90,7 +90,7 @@
   ;; Start Audio Capture
   (. recorder-line (start))
 
-  (dotimes [i 50]
+  (dotimes [i 1]
     (let [buffer  (make-array (. Byte TYPE) buffer-size)
           bcount  (. recorder-line (read buffer 0 buffer-size))
           bbyte   (. ByteBuffer (wrap buffer))
@@ -99,13 +99,17 @@
       (.write raw-file bbyte)
 
       (future
-        (println "Starting encoding!")
-        (let [out (:out (encode bbyte))]
+        (prn "Start encoding!")
+        (let [{out :out err :err exit :exit}  (encode bbyte)]
+          (prn "Exit code: " exit)
+          (prn "StdErr: " err)
           (println "Received bytes: " (count out))
-          (let [bbyte   (. ByteBuffer (wrap out))]
-            ;; (shout/stream bbyte)
-            (.write mp3-file bbyte)))
-        (println "Leaving (future) statement!"))
+            (.write mp3-file (. ByteBuffer (wrap out)))))
+
+
+          ;; (let [bbyte   (. ByteBuffer (wrap out))]
+          ;;   ;; (shout/stream bbyte)
+          ;;   (.write mp3-file bbyte)))
 
       ;; TODO: Call the `drain` method to drain the recorder-line when
       ;; the recording stops. Otherwise the recorded data might seem
