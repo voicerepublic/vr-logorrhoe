@@ -48,17 +48,13 @@
 ;; TODO: Add the other audio-format configuration parameters
 ;; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
 (def audio-sample-freq-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
-;; TODO: Why is the `map` not working?
-;; (map #(.addItem audio-sample-freq-combo-box %) ["22050" "44100" "48000"])
-(.addItem audio-sample-freq-combo-box "22050")
-(.addItem audio-sample-freq-combo-box "44100")
-(.addItem audio-sample-freq-combo-box "48000")
+(doall
+ (map #(.addItem audio-sample-freq-combo-box %) ["22050" "44100" "48000"]))
 (.setSelectedIndex audio-sample-freq-combo-box 1)
 
 (def audio-sample-size-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
-(.addItem audio-sample-size-combo-box "16")
-(.addItem audio-sample-size-combo-box "24")
-(.addItem audio-sample-size-combo-box "32")
+(doall
+ (map #(.addItem audio-sample-size-combo-box %) ["16" "24" "32"]))
 
 (defn start []
   (invoke-later

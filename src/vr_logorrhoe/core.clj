@@ -11,7 +11,7 @@
 (defn -main [& args]
   (gui/start))
 
-(-main)
+;; (-main)
 
 
 ;; (defn crazy-batshit-from-c [num]
