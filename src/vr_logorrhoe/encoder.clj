@@ -4,12 +4,9 @@
 (defn encode [input]
   "Encodes an input [Byte-Array] using `lame`. Returns a map with
    `:out` holding the encoded data as Byte-Array."
-  ;; Using `sdtbuf` should force the output stream to be unbuffered
-  ;; (sh "stdbuf" "-o1" "lame" "-r" "--cbr" "-b" "48" "-s" "44.1" "--bitwidth" "16" "--signed" "--little-endian" "-m" "m" "-" "-"
   (sh "lame" "-r" "--cbr" "-b" "48" "-s" "44.1" "--bitwidth" "16" "--signed" "--little-endian" "-m" "m" "-" "-"
       :in input
       :out-enc :bytes))
-
 
 ;; This is a test scenario that shows that longer output can be
 ;; catpured using clojure.java.shell/sh:

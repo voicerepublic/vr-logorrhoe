@@ -65,7 +65,48 @@ Reverse engineered streaming of Ogg Vorbis files:
                })
 
 #+END_SRC
+
 ** TODOs
+
+*** Streaming to and from /lame/ via stdin/stdout
+
+When encoding with /lame/ via stdin/stdout, the output is too little
+and includes lots of empty bytes. This is a screen-shot comparing two
+mp3 files that were generated using lame with the same arguments, but
+once in the commandline and once using clojure.java.io/shell:
+[[file:doc/lame_output_stream.png]]
+
+There's two problems:
+
+**** The output using clojure.java.io/shell is too small
+     /lame/ buffers the output to stdout, which is sensible, because
+     the output could become huge. However the /shell/ function seems
+     to only get the first portion of it.
+
+     There's two potential solutions:
+
+***** Using the [[https://github.com/Raynes/conch][conch]] library it's possible to use unbuffered stdout
+      However this library hasn't been updated since 2014. This could
+      be ok since it's just doing one well defined job.
+
+***** Using the GNU tool /stdbuf/  it's possible to use unbuffered stdout
+      However this is only available on Linux and first tests didn't
+      yield a different result.
+
+      See /man stdbuf/ for details. Seems to be installed by default
+      on Debian 8.
+
+**** The output contains lots of \5555 characters
+     No clue why this happens.
+
+
+Conclusion: I'm implementing encoding without using stdout as a stream
+for the time being. One additional reason is that I have read
+somewhere that Windows might block when using a long running lame
+process to encode to stdout. This might of course only be fud. Still,
+let's go step by step.
+
+** Notes
 *** TODO Integrate a Vorbis Encoder
 
 **** [[http://svn.xiph.org/trunk/vorbis-java/][vorbis-java]]
@@ -81,10 +122,6 @@ create a local Maven Repo for Leiningen: http://www.elangocheran.com/blog/2013/0
      project.clj doesn't seem to be the way to go since Leiningen 2.
 
 
-*** Maybe not required
-**** TODO Test streaming using [[https://github.com/OlegKunitsyn/libshout-java][libshout-java]]
-**** TODO Alternatively test streaming using [[https://github.com/xiph/Icecast-libshout][native libshout library]] through
-- Either through clojure-jna or Java JNA
 
 ** Development
 
