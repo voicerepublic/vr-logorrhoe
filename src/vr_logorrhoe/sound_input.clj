@@ -7,6 +7,7 @@
             [vr-logorrhoe.utils :refer [get-declared-methods]])
   (:import [java.lang Thread]
            [java.nio ByteBuffer ShortBuffer]
+           [java.io ByteArrayOutputStream]
            [javax.sound.sampled DataLine AudioSystem AudioFileFormat$Type
             LineEvent LineListener AudioFormat Port$Info]))
 
@@ -78,28 +79,29 @@
 (def buffer-size (int (/ (.getBufferSize recorder-line) 5)))
 
 (defn record[]
+  ;; Open the Port
+  (. recorder-line (open audio-format buffer-size))
+
+  ;; Start Audio Capture
+  (. recorder-line (start))
+
   (let [;; When recording, the Input Port will yield a `ByteBuffer`. Saving
         ;; those cannot just be done with 'spit'. However, they can be saved
         ;; into a `FileChannel`.
         ;; http://www.java2s.com/Tutorials/Java/IO/NIO_Buffer/Save_ByteBuffer_to_a_file_in_Java.htm
         raw-file (.getChannel (java.io.FileOutputStream. "clojure.wav"))
-        mp3-file (.getChannel (java.io.FileOutputStream. "clojure.mp3"))]
+        mp3-file (.getChannel (java.io.FileOutputStream. "clojure.mp3"))
+        output-stream (new ByteArrayOutputStream)]
 
-    ;; Open the Port
-    (. recorder-line (open audio-format buffer-size))
-
-    ;; Start Audio Capture
-    (. recorder-line (start))
-
-    (dotimes [i 1]
+    (dotimes [i 5]
       (let [buffer  (make-array (. Byte TYPE) buffer-size)
             bcount  (. recorder-line (read buffer 0 buffer-size))
-            bbyte   (. ByteBuffer (wrap buffer))
-            bshort  (. bbyte (asShortBuffer))]
+            tmp      (. output-stream (write buffer 0 bcount))
+            bytea   (.toByteArray output-stream)
+            bbyte   (. ByteBuffer (wrap bytea))]
 
         (future
           (.write raw-file bbyte)
-
           (prn "Start encoding!")
           (let [{out :out err :err exit :exit}  (encode buffer)]
             (prn "Exit code: " exit)
@@ -118,15 +120,14 @@
         )
       (. Thread (sleep 20)))
 
-    (.close raw-file)
-    (.close mp3-file)
-
     ;; stop the input
     (. recorder-line (stop))
 
     ;; close recorder
-    (. recorder-line (close)) ))
+    (. recorder-line (close))
 
+    (.close raw-file)
+    (.close mp3-file)))
 
 (comment
   (shout/connect)
@@ -134,7 +135,9 @@
   (try
     (record)
     (catch Exception e
-      (println "Caught: " e)))
+      (println "Caught: " e)
+      (. recorder-line (stop))
+      (. recorder-line (close))))
 
   (shout/disconnect)
   )
