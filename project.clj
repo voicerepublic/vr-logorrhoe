@@ -1,12 +1,12 @@
 (defproject vr_logorrhoe "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "VoiceRepublic.com *re-stream* Desktop Client"
+  :url "http://voicerepublic.com/"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[seesaw "1.4.5"]
                  ;; [clj-http "2.1.0"]
-                 [com.gmail.kunicins.olegs/libshout-java "2.2.2"]
                  ;; [net.n01se/clojure-jna "1.0.0"]
+                 [com.gmail.kunicins.olegs/libshout-java "2.2.2"]
                  [org.clojure/clojure "1.8.0"]]
   :main vr-logorrhoe.core
 

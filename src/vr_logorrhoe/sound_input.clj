@@ -3,7 +3,8 @@
 
 (ns vr-logorrhoe.sound-input
   (:require [vr-logorrhoe.shout :as shout]
-            [vr-logorrhoe.encoder :refer [encode]])
+            [vr-logorrhoe.encoder :refer [encode]]
+            [vr-logorrhoe.utils :refer [get-declared-methods]])
   (:import [java.lang Thread]
            [java.nio ByteBuffer ShortBuffer]
            [javax.sound.sampled DataLine AudioSystem AudioFileFormat$Type
@@ -48,6 +49,25 @@
 ;; Get the supported target line for the mixer
 (def line-info (first (seq (. recorder-mixer (getTargetLineInfo)))))
 
+;; Not yet working ideas to close a SourceLine
+(comment
+  (map #(.toString %) (seq (.getDeclaredMethods (.getClass (first (seq (.getFormats line-inf
+) ) ) ) )  ) )
+  ;; (count (.getTargetLineInfo recorder-mixer))
+
+  ;; (.isOpen line-info)
+
+  ;; (.isOpen (. recorder-mixer (getTargetLineInfo)) )
+
+  ;; (.isOpen Line)
+
+  ;; (. recorder-mixer
+  ;;    (.close line-info))
+
+  ;; (. line-info
+  ;;    (isOpen Line$Info) )
+  )
+
 ; Get a target line
 (def recorder-line (try
                 (. recorder-mixer
@@ -57,7 +77,7 @@
                      false))))
 
 ;; Add a line listener for events on the line. This is an optional step
-;; and will be purely used for logging purposes.
+;; and is currently only used for logging purposes.
 (. recorder-line (addLineListener
              (reify LineListener
                 (update [this evt]
@@ -76,55 +96,55 @@
 ;; This needs to be called before the line is open.
 (def buffer-size (int (/ (.getBufferSize recorder-line) 5)))
 
-;; When recording, the Input Port will yield a `ByteBuffer`. Saving
-;; those cannot just be done with 'spit'. However, they can be saved
-;; into a `FileChannel`.
-;; http://www.java2s.com/Tutorials/Java/IO/NIO_Buffer/Save_ByteBuffer_to_a_file_in_Java.htm
-(def raw-file (.getChannel (java.io.FileOutputStream. "clojure.wav")))
-(def mp3-file (.getChannel (java.io.FileOutputStream. "clojure.mp3")))
-
 (defn record[]
-  ;; Open the Port
-  (. recorder-line (open audio-format buffer-size))
+  (let [;; When recording, the Input Port will yield a `ByteBuffer`. Saving
+        ;; those cannot just be done with 'spit'. However, they can be saved
+        ;; into a `FileChannel`.
+        ;; http://www.java2s.com/Tutorials/Java/IO/NIO_Buffer/Save_ByteBuffer_to_a_file_in_Java.htm
+        raw-file (.getChannel (java.io.FileOutputStream. "clojure.wav"))
+        mp3-file (.getChannel (java.io.FileOutputStream. "clojure.mp3"))]
 
-  ;; Start Audio Capture
-  (. recorder-line (start))
+    ;; Open the Port
+    (. recorder-line (open audio-format buffer-size))
 
-  (dotimes [i 1]
-    (let [buffer  (make-array (. Byte TYPE) buffer-size)
-          bcount  (. recorder-line (read buffer 0 buffer-size))
-          bbyte   (. ByteBuffer (wrap buffer))
-          bshort  (. bbyte (asShortBuffer))]
+    ;; Start Audio Capture
+    (. recorder-line (start))
 
-      (.write raw-file bbyte)
+    (dotimes [i 5]
+      (let [buffer  (make-array (. Byte TYPE) buffer-size)
+            bcount  (. recorder-line (read buffer 0 buffer-size))
+            bbyte   (. ByteBuffer (wrap buffer))
+            bshort  (. bbyte (asShortBuffer))]
 
-      (future
-        (prn "Start encoding!")
-        (let [{out :out err :err exit :exit}  (encode bbyte)]
-          (prn "Exit code: " exit)
-          (prn "StdErr: " err)
-          (println "Received bytes: " (count out))
+        (.write raw-file bbyte)
+
+        (future
+          (prn "Start encoding!")
+          (let [{out :out err :err exit :exit}  (encode bbyte)]
+            (prn "Exit code: " exit)
+            (prn "StdErr: " err)
+            (println "Received bytes: " (count out))
             (.write mp3-file (. ByteBuffer (wrap out)))))
 
 
-          ;; (let [bbyte   (. ByteBuffer (wrap out))]
-          ;;   ;; (shout/stream bbyte)
-          ;;   (.write mp3-file bbyte)))
+        ;; (let [bbyte   (. ByteBuffer (wrap out))]
+        ;;   ;; (shout/stream bbyte)
+        ;;   (.write mp3-file bbyte)))
 
-      ;; TODO: Call the `drain` method to drain the recorder-line when
-      ;; the recording stops. Otherwise the recorded data might seem
-      ;; to end pre-maturely.
-      )
-    (. Thread (sleep 20)))
+        ;; TODO: Call the `drain` method to drain the recorder-line when
+        ;; the recording stops. Otherwise the recorded data might seem
+        ;; to end pre-maturely.
+        )
+      (. Thread (sleep 20)))
 
-  (.close raw-file)
-  (.close mp3-file)
+    (.close raw-file)
+    (.close mp3-file)
 
-  ;; stop the input
-  (. recorder-line (stop))
+    ;; stop the input
+    (. recorder-line (stop))
 
-  ;; close recorder
-  (. recorder-line (close)))
+    ;; close recorder
+    (. recorder-line (close)) ))
 
 
 (comment

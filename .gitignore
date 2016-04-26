@@ -9,6 +9,8 @@ pom.xml.asc
 /.nrepl-port
 .hgignore
 .hg/
+*.mp3
+*.wav
 
 #########################
 # Emacs temporary files #
