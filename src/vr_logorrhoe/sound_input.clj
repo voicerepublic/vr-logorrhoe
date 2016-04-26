@@ -91,28 +91,37 @@
         ;; http://www.java2s.com/Tutorials/Java/IO/NIO_Buffer/Save_ByteBuffer_to_a_file_in_Java.htm
         raw-file (.getChannel (java.io.FileOutputStream. "clojure.wav"))
         mp3-file (.getChannel (java.io.FileOutputStream. "clojure.mp3"))
+        ;; Continously growing output-stream
         output-stream (new ByteArrayOutputStream)]
 
-    (dotimes [i 5]
-      (let [buffer  (make-array (. Byte TYPE) buffer-size)
-            bcount  (. recorder-line (read buffer 0 buffer-size))
-            tmp      (. output-stream (write buffer 0 bcount))
-            bytea   (.toByteArray output-stream)
-            bbyte   (. ByteBuffer (wrap bytea))]
+    (dotimes [i 50]
+      (let [buffer    (make-array (. Byte TYPE) buffer-size)
+            bcount    (. recorder-line (read buffer 0 buffer-size))
+            ;; Current sample
+            bbyte-tmp (. ByteBuffer (wrap buffer))
+            ;; Unused var, line only required for side-effects
+            tmp       (. output-stream (write buffer 0 bcount))
+            ;; Everything that has been recorded so far
+            bytea     (.toByteArray output-stream)
+            bbyte     (. ByteBuffer (wrap bytea))]
 
         (future
-          (.write raw-file bbyte)
+          ;; Successively write sample after sample in raw format
+          ;; instead of waiting for record to finish and then write
+          ;; the whole `bbyte` object
+          (.write raw-file bbyte-tmp)
+
           (prn "Start encoding!")
-          (let [{out :out err :err exit :exit}  (encode buffer)]
+          (let [{out :out err :err exit :exit}  (encode buffer)
+                bbyte-mp3 (. ByteBuffer (wrap out))]
             (prn "Exit code: " exit)
             (prn "StdErr: " err)
             (println "Received bytes: " (count out))
-            (.write mp3-file (. ByteBuffer (wrap out)))))
+            (.write mp3-file bbyte-mp3)
 
-
-        ;; (let [bbyte   (. ByteBuffer (wrap out))]
-        ;;   ;; (shout/stream bbyte)
-        ;;   (.write mp3-file bbyte)))
+            (future
+              (prn "Streaming...")
+              (shout/stream bbyte-mp3))))
 
         ;; TODO: Call the `drain` method to drain the recorder-line when
         ;; the recording stops. Otherwise the recorded data might seem
