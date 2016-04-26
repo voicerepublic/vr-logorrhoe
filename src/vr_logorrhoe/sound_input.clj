@@ -91,17 +91,17 @@
     ;; Start Audio Capture
     (. recorder-line (start))
 
-    (dotimes [i 5]
+    (dotimes [i 1]
       (let [buffer  (make-array (. Byte TYPE) buffer-size)
             bcount  (. recorder-line (read buffer 0 buffer-size))
             bbyte   (. ByteBuffer (wrap buffer))
             bshort  (. bbyte (asShortBuffer))]
 
-        (.write raw-file bbyte)
-
         (future
+          (.write raw-file bbyte)
+
           (prn "Start encoding!")
-          (let [{out :out err :err exit :exit}  (encode bbyte)]
+          (let [{out :out err :err exit :exit}  (encode buffer)]
             (prn "Exit code: " exit)
             (prn "StdErr: " err)
             (println "Received bytes: " (count out))
