@@ -49,25 +49,6 @@
 ;; Get the supported target line for the mixer
 (def line-info (first (seq (. recorder-mixer (getTargetLineInfo)))))
 
-;; Not yet working ideas to close a SourceLine
-(comment
-  (map #(.toString %) (seq (.getDeclaredMethods (.getClass (first (seq (.getFormats line-inf
-) ) ) ) )  ) )
-  ;; (count (.getTargetLineInfo recorder-mixer))
-
-  ;; (.isOpen line-info)
-
-  ;; (.isOpen (. recorder-mixer (getTargetLineInfo)) )
-
-  ;; (.isOpen Line)
-
-  ;; (. recorder-mixer
-  ;;    (.close line-info))
-
-  ;; (. line-info
-  ;;    (isOpen Line$Info) )
-  )
-
 ; Get a target line
 (def recorder-line (try
                 (. recorder-mixer
