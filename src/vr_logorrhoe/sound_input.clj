@@ -100,8 +100,6 @@
             ;; Current sample
             bbyte-tmp (. ByteBuffer (wrap buffer))]
 
-
-
         (future
           ;; Successively write sample after sample in raw format
           (.write raw-file bbyte-tmp))
