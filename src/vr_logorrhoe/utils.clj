@@ -1,4 +1,5 @@
-(ns vr-logorrhoe.utils)
+(ns vr-logorrhoe.utils
+  (:import [java.io BufferedReader InputStreamReader]))
 
 (defn get-declared-methods [obj]
   "Get declared methods on `obj` through Java Reflection"
