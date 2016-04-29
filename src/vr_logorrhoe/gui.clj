@@ -1,10 +1,11 @@
 (ns vr-logorrhoe.gui
   (:gen-class)
-  (:use seesaw.core
-        seesaw.font
-        seesaw.chooser)
-  (:require [vr-logorrhoe.sound-input :as sound-input]
-            [clojure.java.browse :refer [browse-url]]))
+  (:require [clojure.java.browse :refer [browse-url]]
+            [seesaw
+             [chooser :refer :all]
+             [core :refer :all]
+             [font :refer :all]]
+            [vr-logorrhoe.sound-input :as sound-input]))
 
 (def app-state (atom {:recording false}))
 

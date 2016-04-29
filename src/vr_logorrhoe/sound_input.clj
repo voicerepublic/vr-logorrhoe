@@ -2,14 +2,13 @@
 ;; http://docs.oracle.com/javase/tutorial/sound/sampled-overview.html
 
 (ns vr-logorrhoe.sound-input
-  (:require [vr-logorrhoe.shout :as shout]
-            [vr-logorrhoe.encoder :refer [encode]]
-            [vr-logorrhoe.utils :refer [get-declared-methods]])
-  (:import [java.lang Thread]
-           [java.nio ByteBuffer ShortBuffer]
-           [java.io ByteArrayOutputStream ByteArrayInputStream]
-           [javax.sound.sampled DataLine AudioSystem AudioFileFormat$Type
-            LineEvent LineListener AudioFormat Port$Info]))
+  (:require [vr-logorrhoe
+             [encoder :refer [encode]]
+             [shout :as shout]])
+  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
+           java.lang.Thread
+           java.nio.ByteBuffer
+           [javax.sound.sampled AudioFormat AudioSystem LineListener]))
 
 ;; Note: It would be possible to check for LINE_IN and MICROPHONE
 ;; directly using
@@ -52,11 +51,11 @@
 
 ; Get a target line
 (def recorder-line (try
-                (. recorder-mixer
-                   (getLine line-info)
-                   (catch Exception e
-                     (println "Exception with getting the line for mixer: " e)
-                     false))))
+                     (. recorder-mixer
+                        (getLine line-info))
+                        (catch Exception e
+                          (println "Exception with getting the line for mixer: " e)
+                          false)))
 
 ;; Add a line listener for events on the line. This is an optional step
 ;; and is currently only used for logging purposes.
@@ -78,7 +77,12 @@
 ;; This needs to be called before the line is open.
 (def buffer-size (int (/ (.getBufferSize recorder-line) 5)))
 
-(defn record[]
+(defn- write-buffer-to-file [buffer file]
+  "Takes a ByteBuffer and writes it into a FileChannel"
+  (future
+    (.write file buffer)))
+
+(defn record []
   ;; Open the Port
   (. recorder-line (open audio-format buffer-size))
 
@@ -91,7 +95,6 @@
         ;; http://www.java2s.com/Tutorials/Java/IO/NIO_Buffer/Save_ByteBuffer_to_a_file_in_Java.htm
         raw-file (.getChannel (java.io.FileOutputStream. "clojure.wav"))
         mp3-file (.getChannel (java.io.FileOutputStream. "clojure.mp3"))
-        mp3-file2 (.getChannel (java.io.FileOutputStream. "clojure2.mp3"))
         output-stream (new ByteArrayOutputStream)]
 
     (dotimes [i 10]
@@ -100,22 +103,16 @@
             ;; Current sample
             bbyte-tmp (. ByteBuffer (wrap buffer))]
 
-        (future
-          ;; Successively write sample after sample in raw format
-          (.write raw-file bbyte-tmp))
+        ;; Successively write sample after sample in raw format
+        (write-buffer-to-file bbyte-tmp raw-file)
 
         (prn "Start encoding!")
         (let [{out :out err :err exit :exit}  (encode buffer)
               bbyte-mp3 (. ByteBuffer (wrap out))]
-
-          (prn "Exit code: " exit)
           (prn "StdErr: " err)
           (println "Received bytes: " (count out))
 
-          (future
-            ;; Successively write sample after sample in MP3 format
-            (.write mp3-file bbyte-mp3))
-
+          (write-buffer-to-file bbyte-mp3 mp3-file)
 
           (. output-stream (write out 0 (count out)))
           (prn "Current size of output-stream: " (.size output-stream))
@@ -123,13 +120,7 @@
           (if (= i 9)
             (let [bytea   (.toByteArray output-stream)
                   input-s (new ByteArrayInputStream bytea)]
-
-              ;; Write a second MP3 file in one go as proof that the OutputStream works
-              (.write mp3-file2 (. ByteBuffer (wrap bytea)))
-
-              (shout/stream input-s))
-            )))
-
+              (shout/stream input-s)))))
 
         ;; TODO: Call the `drain` method to drain the recorder-line when
         ;; the recording stops. Otherwise the recorded data might seem
@@ -143,7 +134,6 @@
     (. recorder-line (close))
 
     (.close raw-file)
-    (.close mp3-file2)
     (.close mp3-file)))
 
 (comment
