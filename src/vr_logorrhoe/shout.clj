@@ -40,11 +40,10 @@
   (.close libshout))
 
 (comment
-  (let [test-input-stream (new java.io.BufferedInputStream
-                               (new java.io.FileInputStream
-                                    (new java.io.File
-                                         "/home/munen/src/voicerepublic_icecast_tests/clients/test.mp3")))]
+  (connect)
+  (stream (new java.io.FileInputStream
+               "/home/munen/src/voicerepublic_icecast_tests/clients/test.mp3"))
 
-    (connect)
-    (stream test-input-stream)
-    (disconnect)))
+
+  (disconnect)
+  )
