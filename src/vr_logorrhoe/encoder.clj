@@ -1,5 +1,5 @@
 (ns vr-logorrhoe.encoder
-  (:require [clojure.java.shell :only [sh]]))
+  (:require [clojure.java.shell :refer [sh] ]))
 
 (defn encode [input]
   "Encodes an input [Byte-Array] using `lame`. Returns a map with

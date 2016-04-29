@@ -1,5 +1,4 @@
 (ns vr-logorrhoe.gui
-  (:gen-class)
   (:require [clojure.java.browse :refer [browse-url]]
             [seesaw
              [chooser :refer :all]
@@ -25,6 +24,7 @@
                   :handler (fn [e] (.dispose (to-frame e)))
                   :name "Exit"
                   :tip  "Close this window"))
+
 (def backup-folder-action (action
                            :handler (fn [e]
                                       (choose-file :remember-directory? true
@@ -49,18 +49,23 @@
 ;; TODO: Add the other audio-format configuration parameters
 ;; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
 (def audio-sample-freq-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
-(doall
- (map #(.addItem audio-sample-freq-combo-box %) ["22050" "44100" "48000"]))
-(.setSelectedIndex audio-sample-freq-combo-box 1)
+(defn- populate-audio-freq-combo-box []
+  (doall
+   (map #(.addItem audio-sample-freq-combo-box %) ["22050" "44100" "48000"]))
+  (.setSelectedIndex audio-sample-freq-combo-box 1))
 
 (def audio-sample-size-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
-(doall
- (map #(.addItem audio-sample-size-combo-box %) ["16" "24" "32"]))
+(defn- populate-audio-sample-size-combo-box []
+  (doall
+   (map #(.addItem audio-sample-size-combo-box %) ["16" "24" "32"])))
 
 (defn start []
   (invoke-later
    (-> f pack! show! ))
   (config f :title)
+
+  (populate-audio-freq-combo-box)
+  (populate-audio-sample-size-combo-box)
 
   (let [logo (label
               :icon (java.io.File. (:logo icons)))

@@ -10,14 +10,6 @@
            java.nio.ByteBuffer
            [javax.sound.sampled AudioFormat AudioSystem LineListener]))
 
-;; Note: It would be possible to check for LINE_IN and MICROPHONE
-;; directly using
-;; (AudioSystem/isLineSupported Port$Info/LINE_IN)
-;; and
-;; (AudioSystem/getLine Port$Info/LINE_IN)
-;; However, this does not always return a line with said capability
-;; (seen in Debian 8). Therefore, we're using the method to request a
-;; line via the Mixer.
 (defn- get-mixer-info []
   "Retrieve supported mixers from OS"
   (seq (. AudioSystem (getMixerInfo))))
@@ -31,7 +23,7 @@
        (get-mixer-info)))
 
 ;; This method is called by the GUI to query for available mixers
-(defn- get-mixer-names []
+(defn get-mixer-names []
   "Returns all available Mixers by name [String]"
   (map :name (get-mixer-infos)))
 
