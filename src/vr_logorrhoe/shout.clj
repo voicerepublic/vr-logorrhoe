@@ -31,7 +31,7 @@
         (let [size (.read input-stream buffer)]
           (prn "Actually streaming!")
           (prn "Streaming size: " size)
-          (when (> size )
+          (when (= size 4150 )
             (.send libshout buffer size)
             (recur)))))
     (.close input-stream)))
