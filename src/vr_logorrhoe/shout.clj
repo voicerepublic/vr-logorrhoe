@@ -3,14 +3,15 @@
 
 (ns vr-logorrhoe.shout)
 
-(def shout-config (atom {:host "52.58.65.224"
+(def shout-config (atom {:host "52.58.144.148"
                          :port 80
-                         :password "thisisagoodpassword"
-                         :mount "/4609"}))
+                         :password "jrzdcupa"
+                         :mount "/ba7174b2-c524-4b37-8611-3c21ac1f64e3"}))
 
 (def libshout (com.gmail.kunicins.olegs.libshout.Libshout.))
 ;; (.getVersion libshout)
 
+;; TODO: Catch java.io.IOException
 (defn connect []
   (.setHost libshout (:host @shout-config))
   (.setPort libshout (:port @shout-config))
@@ -21,13 +22,19 @@
   (.open libshout ))
 
 (defn stream [input-stream]
-  (let [buffer (make-array (. Byte TYPE) 4150)]
-    (loop []
-      (let [size (.read input-stream buffer)]
-        (when (> size )
-          (.send libshout buffer size)
-          (recur)))))
-  (.close input-stream))
+  "Takes an input-stream and starts streaming to Icecast"
+  (prn "vr-logorrhoe.shout: Starting to stream")
+  (prn "Type of input-stream: " (type input-stream))
+  (future
+    (let [buffer (make-array (. Byte TYPE) 4150)]
+      (loop []
+        (let [size (.read input-stream buffer)]
+          (prn "Actually streaming!")
+          (prn "Streaming size: " size)
+          (when (> size )
+            (.send libshout buffer size)
+            (recur)))))
+    (.close input-stream)))
 
 (defn disconnect []
   (.close libshout))
