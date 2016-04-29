@@ -49,22 +49,22 @@
 ;; Get the supported target line for the mixer
 (def line-info (first (seq (. recorder-mixer (getTargetLineInfo)))))
 
-; Get a target line
+                                        ; Get a target line
 (def recorder-line (try
                      (. recorder-mixer
                         (getLine line-info))
-                        (catch Exception e
-                          (println "Exception with getting the line for mixer: " e)
-                          false)))
+                     (catch Exception e
+                       (println "Exception with getting the line for mixer: " e)
+                       false)))
 
 ;; Add a line listener for events on the line. This is an optional step
 ;; and is currently only used for logging purposes.
 (. recorder-line (addLineListener
-             (reify LineListener
-                (update [this evt]
-                  (do (print "Event: " (. evt (getType)))
-                      (newline)
-                      (. *out* (flush)))))))
+                  (reify LineListener
+                    (update [this evt]
+                      (do (print "Event: " (. evt (getType)))
+                          (newline)
+                          (. *out* (flush)))))))
 
 ;; Create a RAW data format. It can be played like this:
 ;;   aplay -t raw clojure.wav -c 1 -r 44100 -f S16_LE
@@ -75,7 +75,7 @@
 ;; buffer. Otherwise there's a racing condition between the mixer
 ;; writing to and this code reading from the buffer.
 ;; This needs to be called before the line is open.
-(def buffer-size (int (/ (.getBufferSize recorder-line) 5)))
+(def mic-buffer-size (int (/ (.getBufferSize recorder-line) 5)))
 
 (defn- write-buffer-to-file [buffer file]
   "Takes a ByteBuffer and writes it into a FileChannel"
@@ -84,22 +84,18 @@
 
 (defn record []
   ;; Open the Port
-  (. recorder-line (open audio-format buffer-size))
+  (. recorder-line (open audio-format mic-buffer-size))
 
   ;; Start Audio Capture
   (. recorder-line (start))
 
-  (let [;; When recording, the Input Port will yield a `ByteBuffer`. Saving
-        ;; those cannot just be done with 'spit'. However, they can be saved
-        ;; into a `FileChannel`.
-        ;; http://www.java2s.com/Tutorials/Java/IO/NIO_Buffer/Save_ByteBuffer_to_a_file_in_Java.htm
-        raw-file (.getChannel (java.io.FileOutputStream. "clojure.wav"))
+  (let [raw-file (.getChannel (java.io.FileOutputStream. "clojure.wav"))
         mp3-file (.getChannel (java.io.FileOutputStream. "clojure.mp3"))
         output-stream (new ByteArrayOutputStream)]
 
     (dotimes [i 10]
-      (let [buffer    (make-array (. Byte TYPE) buffer-size)
-            bcount    (. recorder-line (read buffer 0 buffer-size))
+      (let [buffer    (make-array (. Byte TYPE) mic-buffer-size)
+            bcount    (. recorder-line (read buffer 0 mic-buffer-size))
             ;; Current sample
             bbyte-tmp (. ByteBuffer (wrap buffer))]
 
@@ -122,9 +118,9 @@
                   input-s (new ByteArrayInputStream bytea)]
               (shout/stream input-s)))))
 
-        ;; TODO: Call the `drain` method to drain the recorder-line when
-        ;; the recording stops. Otherwise the recorded data might seem
-        ;; to end pre-maturely.
+      ;; TODO: Call the `drain` method to drain the recorder-line when
+      ;; the recording stops. Otherwise the recorded data might seem
+      ;; to end pre-maturely.
       (. Thread (sleep 20)))
 
     ;; stop the input
