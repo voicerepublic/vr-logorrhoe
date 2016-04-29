@@ -18,12 +18,12 @@
 ;; However, this does not always return a line with said capability
 ;; (seen in Debian 8). Therefore, we're using the method to request a
 ;; line via the Mixer.
-(defn get-mixer-info []
+(defn- get-mixer-info []
   "Retrieve supported mixers from OS"
   (seq (. AudioSystem (getMixerInfo))))
 
 
-(defn get-mixer-infos []
+(defn- get-mixer-infos []
   "Returns mixer-info, name, description of each mixer"
   (map #(let [m %] {:mixer-info m
                     :name (. m (getName))
@@ -31,11 +31,11 @@
        (get-mixer-info)))
 
 ;; This method is called by the GUI to query for available mixers
-(defn get-mixer-names []
+(defn- get-mixer-names []
   "Returns all available Mixers by name [String]"
   (map :name (get-mixer-infos)))
 
-(defn get-recorder-mixer-info [recorder-name]
+(defn- get-recorder-mixer-info [recorder-name]
   "Returns Mixer Info for a specific recorder, queried by name [String]"
   (:mixer-info (first (filter #(= recorder-name (:name %)) (get-mixer-infos)))))
 
@@ -47,12 +47,12 @@
 (def recorder-mixer (. AudioSystem (getMixer recorder-mixer-info)))
 
 ;; Get the supported target line for the mixer
-(def line-info (first (seq (. recorder-mixer (getTargetLineInfo)))))
+(def target-line-info (first (seq (. recorder-mixer (getTargetLineInfo)))))
 
                                         ; Get a target line
 (def recorder-line (try
                      (. recorder-mixer
-                        (getLine line-info))
+                        (getLine target-line-info))
                      (catch Exception e
                        (println "Exception with getting the line for mixer: " e)
                        false)))
@@ -83,6 +83,10 @@
     (.write file buffer)))
 
 (defn record []
+  "Opens the specified Microphone port, starts collecting audio
+  samples from it, encodes it with `lame`, writes a raw and a mp3 file
+  and streams the mp3 audio samples via libshout."
+
   ;; Open the Port
   (. recorder-line (open audio-format mic-buffer-size))
 
@@ -91,32 +95,33 @@
 
   (let [raw-file (.getChannel (java.io.FileOutputStream. "clojure.wav"))
         mp3-file (.getChannel (java.io.FileOutputStream. "clojure.mp3"))
-        output-stream (new ByteArrayOutputStream)]
+        shout-output-stream (new ByteArrayOutputStream)]
 
     (dotimes [i 10]
-      (let [buffer    (make-array (. Byte TYPE) mic-buffer-size)
-            bcount    (. recorder-line (read buffer 0 mic-buffer-size))
+      (let [mic-sample-buffer    (make-array (. Byte TYPE) mic-buffer-size)
+            ;; Only required for side-effect
+            tmp (. recorder-line (read mic-sample-buffer 0 mic-buffer-size))
             ;; Current sample
-            bbyte-tmp (. ByteBuffer (wrap buffer))]
+            mic-sample-bbyte (. ByteBuffer (wrap mic-sample-buffer))]
 
         ;; Successively write sample after sample in raw format
-        (write-buffer-to-file bbyte-tmp raw-file)
+        (write-buffer-to-file mic-sample-bbyte raw-file)
 
         (prn "Start encoding!")
-        (let [{out :out err :err exit :exit}  (encode buffer)
-              bbyte-mp3 (. ByteBuffer (wrap out))]
-          (prn "StdErr: " err)
-          (println "Received bytes: " (count out))
+        (let [{encoder-out :out encoder-err :err exit :exit}  (encode mic-sample-buffer)
+              bbyte-mp3 (. ByteBuffer (wrap encoder-out))]
+          (prn "StdErr: " encoder-err)
+          (println "Received bytes: " (count encoder-out))
 
           (write-buffer-to-file bbyte-mp3 mp3-file)
 
-          (. output-stream (write out 0 (count out)))
-          (prn "Current size of output-stream: " (.size output-stream))
+          (. shout-output-stream (write encoder-out 0 (count encoder-out)))
+          (prn "Current size of output-stream: " (.size shout-output-stream))
 
           (if (= i 9)
-            (let [bytea   (.toByteArray output-stream)
-                  input-s (new ByteArrayInputStream bytea)]
-              (shout/stream input-s)))))
+            (let [tmp-bytea          (.toByteArray shout-output-stream)
+                  shout-input-stream (new ByteArrayInputStream tmp-bytea)]
+              (shout/stream shout-input-stream)))))
 
       ;; TODO: Call the `drain` method to drain the recorder-line when
       ;; the recording stops. Otherwise the recorded data might seem
