@@ -4,14 +4,17 @@
 
 This is literate documentation for the VR native streaming desktop
 application. The stack is based on
+
 - [[http://clojure.org/][Clojure]]
 - [[https://github.com/daveray/seesaw][seesaw]] [a LISPy Swing wrapper]
-- [[https://github.com/Chouser/clojure-jna][clojure-jna]] [Dynamically load and use native C libs from Clojure using JNA]
+- [[https://github.com/OlegKunitsyn/libshout-java][libshout-java]]
 
 ** libshout-java
-
 *** Install
     Tested on Debian Jessie
+
+Note that putting a Jar into */lib* or using *:resource-paths* in
+project.clj doesn't seem to be the way to go since Leiningen 2.
 
 **** Checkout libshout-java
 #+BEGIN_SRC shell
@@ -29,7 +32,7 @@ cd libshout-java
  - Find your version via
 
 #+BEGIN_SRC shell
-pt-cache show libshout3-dev | ag version | egrep -o "2.[0-9].[0-9]"
+apt-cache show libshout3-dev | ag version | egrep -o "2.[0-9].[0-9]"
 #+END_SRC
 
   - Then install the library to your local maven repository so that
@@ -66,61 +69,28 @@ Reverse engineered streaming of Ogg Vorbis files:
 
 #+END_SRC
 
-** TODOs
+** To-dos
+** Implementation Notes
+*** Finding available audio input devices
+Note: It would be possible to check for LINE_IN and MICROPHONE
+directly using
+(AudioSystem/isLineSupported Port$Info/LINE_IN)
+and
+(AudioSystem/getLine Port$Info/LINE_IN)
+However, this does not always return a line with said capability
+(seen in Debian 8). Therefore, we're using the method to request a
+line via the Mixer.
 
-*** Streaming to and from /lame/ via stdin/stdout
+*** Why streaming MP3 and not Vorbis?
 
-When encoding with /lame/ via stdin/stdout, the output is too little
-and includes lots of empty bytes. This is a screen-shot comparing two
-mp3 files that were generated using lame with the same arguments, but
-once in the commandline and once using clojure.java.io/shell:
-[[file:doc/lame_output_stream.png]]
+[[http://svn.xiph.org/trunk/vorbis-java/][vorbis-java]] is the official Java lib from Xiph, the creators of Ogg
+Vorbis. It has example source and even a port of the libshout lib.
 
-There's two problems:
-
-**** The output using clojure.java.io/shell is too small
-     /lame/ buffers the output to stdout, which is sensible, because
-     the output could become huge. However the /shell/ function seems
-     to only get the first portion of it.
-
-     There's two potential solutions:
-
-***** Using the [[https://github.com/Raynes/conch][conch]] library it's possible to use unbuffered stdout
-      However this library hasn't been updated since 2014. This could
-      be ok since it's just doing one well defined job.
-
-***** Using the GNU tool /stdbuf/  it's possible to use unbuffered stdout
-      However this is only available on Linux and first tests didn't
-      yield a different result.
-
-      See /man stdbuf/ for details. Seems to be installed by default
-      on Debian 8.
-
-**** The output contains lots of \5555 characters
-     No clue why this happens.
-
-
-Conclusion: I'm implementing encoding without using stdout as a stream
-for the time being. One additional reason is that I have read
-somewhere that Windows might block when using a long running lame
-process to encode to stdout. This might of course only be fud. Still,
-let's go step by step.
-
-** Notes
-*** TODO Integrate a Vorbis Encoder
-
-**** [[http://svn.xiph.org/trunk/vorbis-java/][vorbis-java]]
-     This is the official Java lib from Xiph, the creators of Ogg
-     Vorbis. It has example source and even a port of the libshout lib.
-
-     Unfortunately, though, it hasn't been updated since 2007, is
-still in Beta and not available from Maven. For a manual install,
-package the Class files with *jar cf something.jar [files]* and then
-create a local Maven Repo for Leiningen: http://www.elangocheran.com/blog/2013/03/installing-jar-files-locally-for-leiningen-2/
-
-     Note that putting a Jar into */lib* or using *:resource-paths* in
-     project.clj doesn't seem to be the way to go since Leiningen 2.
-
+Unfortunately, though, it hasn't been updated since 2007, is still in
+Beta and not available from Maven. For a manual install, package the
+Class files with *jar cf something.jar [files]* and then create a
+local Maven Repo for Leiningen:
+http://www.elangocheran.com/blog/2013/03/installing-jar-files-locally-for-leiningen-2/
 
 
 ** Development
