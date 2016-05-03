@@ -13,12 +13,13 @@
     (let [in (new BufferedReader (new InputStreamReader input-stream))]
       (loop []
         (let [line (.readLine in)]
-          ;; (when (> (count line))
-            (prn line))
-            ;; (recur)))))
-    (.close input-stream)))
+          (if (not (= line nil))
+            (prn line)
+            (recur))))
+      (.close input-stream))
     (catch Exception e
       (println "Caught: " e))))
+
 ;; (print-input-stream (new java.io.FileInputStream "/tmp/foo"))
 
 ;; (defn crazy-batshit-from-c [num]
