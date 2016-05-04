@@ -41,7 +41,7 @@
 ;; Get the supported target line for the mixer
 (def target-line-info (first (seq (. recorder-mixer (getTargetLineInfo)))))
 
-                                        ; Get a target line
+;; Get a target line
 (def recorder-line (try
                      (. recorder-mixer
                         (getLine target-line-info))

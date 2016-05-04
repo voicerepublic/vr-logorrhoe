@@ -1,5 +1,6 @@
 (ns vr-logorrhoe.utils
-  (:import [java.io BufferedReader InputStreamReader]))
+  (:import [java.io BufferedReader InputStreamReader])
+  (:require [clojure.java.io :as io]))
 
 (defn get-declared-methods [obj]
   "Get declared methods on `obj` through Java Reflection"
@@ -20,8 +21,20 @@
     (catch Exception e
       (println "Caught: " e))))
 
-;; (print-input-stream (new java.io.FileInputStream "/tmp/foo"))
+(defn path-exists? [path]
+  (.exists (io/file path)))
 
-;; (defn crazy-batshit-from-c [num]
-;;   (jna/invoke Integer c/printf "The number given: %d\n" num))
-;; (crazy-batshit-from-c 112423)
+(defn folder-exists? [folder]
+  (and (path-exists? folder)
+       (.isDirectory (io/file folder))))
+
+(defn create-folder [folder]
+  (.mkdir (java.io.File. folder)))
+
+(defn remove-folder [folder]
+  (.delete (java.io.File. folder)))
+
+(defn conj-path [& args]
+  "Takes a list of folders and joins them in regard to the current
+  Operating System. Returns the resulting path as a String."
+  (str (apply io/file args)))
