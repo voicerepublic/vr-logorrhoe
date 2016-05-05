@@ -9,6 +9,16 @@ application. The stack is based on
 - [[https://github.com/daveray/seesaw][seesaw]] [a LISPy Swing wrapper]
 - [[https://github.com/OlegKunitsyn/libshout-java][libshout-java]]
 
+*** Audio Architecture
+
+#+BEGIN_SRC artist
+    +----------------------+        +--------------------+          +-------------------+
+    |    Audio Input       |        |    MP3 Encoding    |          |  Web Audio Stream |
+    |   Java `sampled`     +------->|     shell lame     +--------->|    libshout       |
+    |                      |        |                    |          |                   |
+    +----------------------+        +--------------------+          +-------------------+
+#+END_SRC
+
 ** libshout-java
 *** Install
     Tested on Debian Jessie
