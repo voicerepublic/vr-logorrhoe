@@ -9,15 +9,27 @@ application. The stack is based on
 - [[https://github.com/daveray/seesaw][seesaw]] [a LISPy Swing wrapper]
 - [[https://github.com/OlegKunitsyn/libshout-java][libshout-java]]
 
-*** Audio Architecture
+*** Audio Data Flow
 
 #+BEGIN_SRC artist
     +----------------------+        +--------------------+          +-------------------+
     |    Audio Input       |        |    MP3 Encoding    |          |  Web Audio Stream |
-    |   Java `sampled`     +------->|     shell lame     +--------->|    libshout       |
+    |   Java `sampled`     +------->|     shell lame     +--------->|   libshout(JNI)   |
     |                      |        |                    |          |                   |
     +----------------------+        +--------------------+          +-------------------+
 #+END_SRC
+
+**** Current
+
+   | Source                   | Input                    | Output                                      |
+   |--------------------------+--------------------------+---------------------------------------------|
+   | Audio In                 | /sampled/ TargetDataLine | discreet ByteArray /mic-sample-buffer/      |
+   | /mic-sample-buffer/      | self                     | ByteArrayOutputStream /shout-output-stream/ |
+   | /shout-output-stream/    | self                     | clojure.java.shell ByteArray                |
+   | encoder output ByteArray | shout-input-stream       | shout-output-stream                         |
+
+**** Target
+     No discrete steps. A continuous stream flows from Audio-In to Encoder to libshout.
 
 ** libshout-java
 *** Install
