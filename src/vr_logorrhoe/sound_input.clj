@@ -5,7 +5,7 @@
   (:require [vr-logorrhoe
              [encoder :refer [encode]]
              [shout :as shout]])
-  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
+  (:import [java.io ByteArrayInputStream ByteArrayOutputStream PipedInputStream PipedOutputStream]
            java.lang.Thread
            java.nio.ByteBuffer
            [javax.sound.sampled AudioFormat AudioSystem LineListener]))
@@ -87,51 +87,47 @@
 
   (let [raw-file (.getChannel (java.io.FileOutputStream. "clojure.wav"))
         mp3-file (.getChannel (java.io.FileOutputStream. "clojure.mp3"))
-        shout-output-stream (new ByteArrayOutputStream)]
+        audio-input-stream (new PipedInputStream)
+        audio-output-stream (PipedOutputStream. audio-input-stream)]
 
-    (dotimes [i 10]
+    (dotimes [i 50]
       (let [mic-sample-buffer    (make-array (. Byte TYPE) mic-buffer-size)
             ;; Only required for side-effect
-            tmp (. recorder-line (read mic-sample-buffer 0 mic-buffer-size))
+            mic-sample-count (. recorder-line (read mic-sample-buffer 0 mic-buffer-size))
             ;; Current sample
             mic-sample-bbyte (. ByteBuffer (wrap mic-sample-buffer))]
+
+        (future
+          (.write audio-output-stream mic-sample-buffer 0 mic-sample-count))
 
         ;; Successively write sample after sample in raw format
         (write-buffer-to-file mic-sample-bbyte raw-file)
 
-        (prn "Start encoding!")
-        (let [{encoder-out :out encoder-err :err exit :exit}  (encode mic-sample-buffer)
-              bbyte-mp3 (. ByteBuffer (wrap encoder-out))]
-          (prn "StdErr: " encoder-err)
-          (println "Received bytes: " (count encoder-out))
+        (if (= i 9)
+          (future
+            (prn "Start encoding!")
+            (let [{encoder-out :out encoder-err :err exit :exit}  (encode audio-input-stream
+                                                                          shout/stream)])
+            ;; TODO: The following lines are never called, they should be!!
 
-          (write-buffer-to-file bbyte-mp3 mp3-file)
+            ;; stop the input
+            (. recorder-line (stop))
 
-          (. shout-output-stream (write encoder-out 0 (count encoder-out)))
-          (prn "Current size of output-stream: " (.size shout-output-stream))
+            ;; close recorder
+            (. recorder-line (close)))))
 
-          (if (= i 9)
-            (let [tmp-bytea          (.toByteArray shout-output-stream)
-                  shout-input-stream (new ByteArrayInputStream tmp-bytea)]
-              (shout/stream shout-input-stream)))))
 
       ;; TODO: Call the `drain` method to drain the recorder-line when
       ;; the recording stops. Otherwise the recorded data might seem
       ;; to end pre-maturely.
       (. Thread (sleep 20)))
 
-    ;; stop the input
-    (. recorder-line (stop))
-
-    ;; close recorder
-    (. recorder-line (close))
 
     (.close raw-file)
     (.close mp3-file)))
 
 (comment
   (shout/connect)
-
   (try
     (record)
     (catch Exception e

@@ -45,10 +45,14 @@
     (let [buffer (make-array (. Byte TYPE) stream-sample-size)]
       (loop []
         (let [size (.read input-stream buffer)]
-          (when (= size stream-sample-size )
-            (.send (libshout) buffer size)
-            (recur)))))
-    (.close input-stream)))
+          (prn "vr-logorrhoe.shout: Read 'size' bytes: " size)
+          ;; KLUDGE: If the sample-size does not match 4150, libshout might core-dump!
+          (if (> size 0 )
+            (do
+              (.send (libshout) buffer size)
+              (recur)))))
+      (prn "Closing input stream")
+      (.close input-stream))))
 
 (comment
   (connect)
