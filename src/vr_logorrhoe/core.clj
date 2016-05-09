@@ -5,7 +5,6 @@
              [gui :as gui]]))
 
 (defn -main [& args]
-  (config/create-initial-configuration-setup)
   (gui/start))
 
 
