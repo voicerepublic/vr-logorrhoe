@@ -106,10 +106,7 @@
         (if (= i 9)
           (future
             (prn "Start encoding!")
-            (let [{encoder-out :out encoder-err :err exit :exit}  (encode audio-input-stream
-                                                                          shout/stream)]
-              (prn "Inside encoding/shouting let")
-              ))))
+            (encode audio-input-stream shout/stream))))
 
 
       ;; TODO: Call the `drain` method to drain the recorder-line when

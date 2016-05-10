@@ -6,6 +6,8 @@
   `callback` function"
   (sh "lame" "-r" "--cbr" "-b" "256" "-s" "44.1" "--bitwidth" "16" "--signed" "--little-endian" "-m" "m" "-" "-"
       :in input
-      ;; Pass stderr to JVM
-      :err :pass
+      :err #(do (prn "lame has written to stderr!")
+                ;; TODO: `print-input-stream` doesn't print anything
+                ;; useful for this type of InputStream as of now.
+                (vr-logorrhoe.utils/print-input-stream %))
       :out #(callback %)))
