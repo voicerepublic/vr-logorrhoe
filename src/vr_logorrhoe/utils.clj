@@ -31,8 +31,20 @@
 (defn create-folder [folder]
   (.mkdir (java.io.File. folder)))
 
-(defn remove-folder [folder]
-  (.delete (java.io.File. folder)))
+(defn remove-folder
+  ([folder]
+   (let [f (java.io.File. folder)]
+     (when (.isDirectory f)
+       (.delete f))))
+  ([folder recursive]
+   (let [f (java.io.File. folder)]
+     (when (and
+            (= recursive true)
+            (.isDirectory f))
+       (let [file-list (.listFiles f)]
+         (doall
+          (map #(.delete %) file-list))
+         (.delete f))))))
 
 (defn conj-path [& args]
   "Takes a list of folders and joins them in regard to the current

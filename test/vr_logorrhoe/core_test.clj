@@ -15,7 +15,7 @@
 
 (defn- remove-fs-fixtures []
   (utils/remove-folder "/tmp/spectest")
-  (utils/remove-folder config/config-directory))
+  (utils/remove-folder config/config-directory true))
 
 (defn test-fixtures [f]
   (remove-fs-fixtures)
