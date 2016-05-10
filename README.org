@@ -19,17 +19,46 @@ application. The stack is based on
     +----------------------+        +--------------------+          +-------------------+
 #+END_SRC
 
-**** Current
+To be able to stream Audio date from /sampled/ over to the Shell
+(/lame/) and from there again to /libshout/, many options were
+evaluated. The Clojure implementation of /clojure.java.shell/ does not
+support creating or sustaining a stream of output, only discrete
+steps. See [[http://clojuredocs.org/clojure.java.shell/sh][ClojureDoc]] for more information.
 
-   | Source                   | Input                    | Output                                      |
-   |--------------------------+--------------------------+---------------------------------------------|
-   | Audio In                 | /sampled/ TargetDataLine | discreet ByteArray /mic-sample-buffer/      |
-   | /mic-sample-buffer/      | self                     | ByteArrayOutputStream /shout-output-stream/ |
-   | /shout-output-stream/    | self                     | clojure.java.shell ByteArray                |
-   | encoder output ByteArray | shout-input-stream       | shout-output-stream                         |
+**** Alternative options
 
-**** Target
-     No discrete steps. A continuous stream flows from Audio-In to Encoder to libshout.
+***** Encoding in discrete steps
+
+This has several obvious downsides. For example that it would create
+multiple MP3 blobs, each with it's own header. Also synchronization
+between sending those blobs would be hard.
+
+***** Monkey Patching /clojure.java.shell/
+
+I tried, but got stuck with deadlocks. I didn't continue down that
+path, because other people have spent more time on doing this right
+(see below).
+
+***** Using the [[https://github.com/Raynes/conch][Conch Library]] for shelling out asynchronously
+
+This one was a good contender, however it was dropped in favor of
+/clojure.java.shell2/. The reasons being that /shell2/ feels more
+idiomatic and that Conch isn't being actively developed
+anymore. /shell2/ hasn't seen a commit even longer, but is based on
+the Clojure core lib /clojure.java.shell/ which gives it some
+additional credibility.
+
+***** Using /clojure.java.shell2/
+
+According to [[https://groups.google.com/forum/#!topic/clojure-dev/A6xFhcPKdws][this discussion]] on the Clojure dev mailing list, Stuart
+Halloway (who is very active on this mailing list) sees
+/clojure.java.shell/ as under-powered and doesn't want to add any more
+effort in sustaining it's development.
+
+However, Marc Limotte has created /clojure.java.shell2/ which is an
+extension of the core library and supports various non-breaking
+additions.
+
 
 ** libshout-java
 *** Install

@@ -117,8 +117,7 @@
       ;; to end pre-maturely.
       (. Thread (sleep 20)))
 
-    (prn "AFTER dowhile")
-    ;; stop the input
+    ;; stop reading from the input line
     (. recorder-line (stop))
 
     ;; close recorder

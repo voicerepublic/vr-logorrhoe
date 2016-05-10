@@ -46,7 +46,6 @@
       (loop []
         (let [size (.read input-stream buffer)]
           (prn "vr-logorrhoe.shout: Read 'size' bytes: " size)
-          ;; KLUDGE: If the sample-size does not match 4150, libshout might core-dump!
           (if (> size 0 )
             (do
               (.send (libshout) buffer size)
