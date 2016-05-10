@@ -10,4 +10,6 @@
   :main vr-logorrhoe.core
 
   :repositories [["sonatype" "http://oss.sonatype.org/content/repositories/releases"]
-                 ["central" "http://mirrors.ibiblio.org/pub/mirrors/maven2"]])
+                 ["central" "http://mirrors.ibiblio.org/pub/mirrors/maven2"]
+                 ["voicerepublic" {:url "blog.voicerepublic.com/maven-repository/"
+                                   :checksum :ignore}]]
