@@ -90,7 +90,7 @@
         audio-input-stream (new PipedInputStream)
         audio-output-stream (PipedOutputStream. audio-input-stream)]
 
-    (dotimes [i 50]
+    (dotimes [i 30]
       (let [mic-sample-buffer    (make-array (. Byte TYPE) mic-buffer-size)
             ;; Only required for side-effect
             mic-sample-count (. recorder-line (read mic-sample-buffer 0 mic-buffer-size))
@@ -107,14 +107,9 @@
           (future
             (prn "Start encoding!")
             (let [{encoder-out :out encoder-err :err exit :exit}  (encode audio-input-stream
-                                                                          shout/stream)])
-            ;; TODO: The following lines are never called, they should be!!
-
-            ;; stop the input
-            (. recorder-line (stop))
-
-            ;; close recorder
-            (. recorder-line (close)))))
+                                                                          shout/stream)]
+              (prn "Inside encoding/shouting let")
+              ))))
 
 
       ;; TODO: Call the `drain` method to drain the recorder-line when
@@ -122,6 +117,12 @@
       ;; to end pre-maturely.
       (. Thread (sleep 20)))
 
+    (prn "AFTER dowhile")
+    ;; stop the input
+    (. recorder-line (stop))
+
+    ;; close recorder
+    (. recorder-line (close))
 
     (.close raw-file)
     (.close mp3-file)))
