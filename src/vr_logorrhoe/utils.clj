@@ -31,7 +31,9 @@
 (defn create-folder [folder]
   (.mkdir (java.io.File. folder)))
 
-(defn remove-folder
+(defn delete-folder
+  "Deletes the folder 'folder'. Optionally deletes 'folder'
+  recursively if the second argument is set to `true`"
   ([folder]
    (let [f (java.io.File. folder)]
      (when (.isDirectory f)

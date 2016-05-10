@@ -14,8 +14,8 @@
              [utils :as utils]]))
 
 (defn- remove-fs-fixtures []
-  (utils/remove-folder "/tmp/spectest")
-  (utils/remove-folder config/config-directory true))
+  (utils/delete-folder "/tmp/spectest")
+  (utils/delete-folder config/config-directory true))
 
 (defn test-fixtures [f]
   (remove-fs-fixtures)
@@ -37,7 +37,7 @@
 
   (testing "Remove folder"
     (utils/create-folder "/tmp/spectest")
-    (utils/remove-folder "/tmp/spectest")
+    (utils/delete-folder "/tmp/spectest")
     (is (= (utils/folder-exists? "/tmp/spectest")
            false)))
 
