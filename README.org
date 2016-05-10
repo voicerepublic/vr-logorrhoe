@@ -1,5 +1,7 @@
 * VR *re:stream*
 
+[[https://gitlab.com/voicerepublic/voicerepublic_logorrhoe/badges/master/build.svg]]
+
 ** General
 
 This is literate documentation for the VR native streaming desktop
