@@ -11,5 +11,6 @@
 
   :repositories [["sonatype" "http://oss.sonatype.org/content/repositories/releases"]
                  ["central" "http://mirrors.ibiblio.org/pub/mirrors/maven2"]
-                 ["voicerepublic" {:url "blog.voicerepublic.com/maven-repository/"
-                                   :checksum :ignore}]]
+                 ;; TODO: This will later hold our own Maven Repository for libshout-maven
+                 ["voicerepublic" {:url "http://blog.voicerepublic.com/maven-repository/"
+                                   :checksum :ignore}]])

@@ -2,14 +2,14 @@ variables:
   PLACEHOLDER: "placeholder"
 
 before_script:
-  - apt-get update -y
-  - apt-get install default-jre -y
-  - wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
-  - chmod a+x lein
-  - export LEIN_ROOT=1
-  - PATH=$PATH:.
-  - lein deps
+  # - apt-get update -y
+  # - apt-get install default-jre -y
+  # - wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
+  # - chmod a+x lein
+  # - export LEIN_ROOT=1
+  # - PATH=$PATH:.
+  # - lein deps
 
 test:
   script:
-    - lein test
+    # - lein test
