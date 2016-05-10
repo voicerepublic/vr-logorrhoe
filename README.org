@@ -27,6 +27,19 @@ steps. See [[http://clojuredocs.org/clojure.java.shell/sh][ClojureDoc]] for more
 
 **** Alternative options
 
+***** Using /clojure.java.shell2/
+
+This is the version that is currently implemented!
+
+According to [[https://groups.google.com/forum/#!topic/clojure-dev/A6xFhcPKdws][this discussion]] on the Clojure dev mailing list, Stuart
+Halloway (who is very active on this mailing list) sees
+/clojure.java.shell/ as under-powered and doesn't want to add any more
+effort in sustaining it's development.
+
+However, Marc Limotte has created /clojure.java.shell2/ which is an
+extension of the core library and supports various non-breaking
+additions.
+
 ***** Encoding in discrete steps
 
 This has several obvious downsides. For example that it would create
@@ -48,17 +61,9 @@ anymore. /shell2/ hasn't seen a commit even longer, but is based on
 the Clojure core lib /clojure.java.shell/ which gives it some
 additional credibility.
 
-***** Using /clojure.java.shell2/
-
-According to [[https://groups.google.com/forum/#!topic/clojure-dev/A6xFhcPKdws][this discussion]] on the Clojure dev mailing list, Stuart
-Halloway (who is very active on this mailing list) sees
-/clojure.java.shell/ as under-powered and doesn't want to add any more
-effort in sustaining it's development.
-
-However, Marc Limotte has created /clojure.java.shell2/ which is an
-extension of the core library and supports various non-breaking
-additions.
-
+***** Using Java ProcessBuilder
+Java has a Class for creating and managing Sub-Processes called
+[[http://docs.oracle.com/javase/8/docs/api/java/lang/ProcessBuilder.html][ProcessBuilder]]. I did some initial tests, but /shell2/ prevailed.
 
 ** libshout-java
 *** Install
