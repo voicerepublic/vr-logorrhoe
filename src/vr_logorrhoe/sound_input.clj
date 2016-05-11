@@ -86,7 +86,6 @@
   (. recorder-line (start))
 
   (let [raw-file (.getChannel (java.io.FileOutputStream. "clojure.wav"))
-        mp3-file (.getChannel (java.io.FileOutputStream. "clojure.mp3"))
         audio-input-stream (new PipedInputStream)
         audio-output-stream (PipedOutputStream. audio-input-stream)]
 
@@ -103,11 +102,13 @@
         ;; Successively write sample after sample in raw format
         (write-buffer-to-file mic-sample-bbyte raw-file)
 
+        ;; Give the audio buffer a little heads-up before starting to
+        ;; encode and stream. Otherwise the buffer will be depleted
+        ;; quickly and the encoding/streaming process will terminate!
         (if (= i 9)
           (future
             (prn "Start encoding!")
             (encode audio-input-stream shout/stream))))
-
 
       ;; TODO: Call the `drain` method to drain the recorder-line when
       ;; the recording stops. Otherwise the recorded data might seem
@@ -120,8 +121,7 @@
     ;; close recorder
     (. recorder-line (close))
 
-    (.close raw-file)
-    (.close mp3-file)))
+    (.close raw-file)))
 
 (comment
   (shout/connect)
