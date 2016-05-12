@@ -10,7 +10,7 @@
   :main vr-logorrhoe.core
 
   :repositories [["sonatype" "http://oss.sonatype.org/content/repositories/releases"]
-                 ["central" "http://mirrors.ibiblio.org/pub/mirrors/maven2"]
+                 ["central" "http://mirrors.ibiblio.org/pub/mirrors/maven2"]])
                  ;; TODO: This will later hold our own Maven Repository for libshout-maven
-                 ["voicerepublic" {:url "http://blog.voicerepublic.com/maven-repository/"
-                                   :checksum :ignore}]])
+                 ;; ["voicerepublic" {:url "http://blog.voicerepublic.com/maven-repository/"
+                 ;;                   :checksum :ignore}]])
