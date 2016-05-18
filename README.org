@@ -69,19 +69,29 @@ Java has a Class for creating and managing Sub-Processes called
 
 ** libshout-java
 *** Install
-    Tested on Debian Jessie
 
 Note that putting a Jar into */lib* or using *:resource-paths* in
 project.clj doesn't seem to be the way to go since Leiningen 2.
+**** OS X
+***** Checkout libshout-java
+#+BEGIN_SRC shell
+git clone git@github.com:poochiethecat/libshout-java.git
+cd libshout-java
+brew install ./libshout.rb
+mvn install
+cp ./target/libshout-java.so ~/src/voicerepublic_logorrhoe/target/libshout-java.so
+#+END_SRC
 
-**** Checkout libshout-java
+**** Debian
+***** Checkout libshout-java
+
 #+BEGIN_SRC shell
 apt-get install git libshout3-dev maven
 git clone https://github.com/OlegKunitsyn/libshout-java.git
 cd libshout-java
 #+END_SRC
 
-**** Fix a test (otherwise it will not install)
+***** Fix a test (otherwise it will not install)
 
  - Fix the test /testVersion()/ in
    /src/test/java/com/gmail/kunicins/olegs/libshout/LibshoutTest.java/ to
