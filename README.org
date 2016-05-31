@@ -1,6 +1,6 @@
 * VR *re:stream*
 
-[[https://gitlab.com/voicerepublic/voicerepublic_logorrhoe/badges/master/build.svg]]
+  [[https://gitlab.com/voicerepublic/voicerepublic_logorrhoe/badges/master/build.svg]]
 
 ** General
 
@@ -9,20 +9,18 @@ application. The stack is based on
 
 - [[http://clojure.org/][Clojure]]
 - [[https://github.com/daveray/seesaw][seesaw]] [a LISPy Swing wrapper]
-- [[https://github.com/OlegKunitsyn/libshout-java][libshout-java]]
 
 *** Audio Data Flow
 
 #+BEGIN_SRC artist
     +----------------------+        +--------------------+          +-------------------+
     |    Audio Input       |        |    MP3 Encoding    |          |  Web Audio Stream |
-    |   Java `sampled`     +------->|     shell lame     +--------->|   libshout(JNI)   |
-    |                      |        |                    |          |                   |
+    |   Java `sampled`     +------->|     shell lame     +--------->|      HTTP PUT     |
     +----------------------+        +--------------------+          +-------------------+
 #+END_SRC
 
 To be able to stream Audio date from /sampled/ over to the Shell
-(/lame/) and from there again to /libshout/, many options were
+(/lame/) and from there again to /http put/, many options were
 evaluated. The Clojure implementation of /clojure.java.shell/ does not
 support creating or sustaining a stream of output, only discrete
 steps. See [[http://clojuredocs.org/clojure.java.shell/sh][ClojureDoc]] for more information.
@@ -66,51 +64,6 @@ additional credibility.
 ***** Using Java ProcessBuilder
 Java has a Class for creating and managing Sub-Processes called
 [[http://docs.oracle.com/javase/8/docs/api/java/lang/ProcessBuilder.html][ProcessBuilder]]. I did some initial tests, but /shell2/ prevailed.
-
-** libshout-java
-*** Install
-
-Note that putting a Jar into */lib* or using *:resource-paths* in
-project.clj doesn't seem to be the way to go since Leiningen 2.
-**** OS X
-***** Checkout libshout-java
-#+BEGIN_SRC shell
-git clone git@github.com:poochiethecat/libshout-java.git
-cd libshout-java
-brew install ./libshout.rb
-mvn install
-cp ./target/libshout-java.so ~/src/voicerepublic_logorrhoe/target/libshout-java.so
-#+END_SRC
-
-**** Debian
-***** Checkout libshout-java
-
-#+BEGIN_SRC shell
-apt-get install git libshout3-dev maven
-git clone https://github.com/OlegKunitsyn/libshout-java.git
-cd libshout-java
-#+END_SRC
-
-***** Fix a test (otherwise it will not install)
-
- - Fix the test /testVersion()/ in
-   /src/test/java/com/gmail/kunicins/olegs/libshout/LibshoutTest.java/ to
-   check for your installed version of libshout
- - It's tested and working with version 2.3.1
- - Find your version via
-
-#+BEGIN_SRC shell
-apt-cache show libshout3-dev | ag version | egrep -o "2.[0-9].[0-9]"
-#+END_SRC
-
-  - Then install the library to your local maven repository so that
-    `lein deps` can find it
-
-#+BEGIN_SRC shell
-mvn install
-#+END_SRC
-
-**** TODO Move this compiled Library to a HTTP repo so that not every user has to install it to a local repo
 
 ** shout protocol
 Reverse engineered streaming of Ogg Vorbis files:
@@ -160,6 +113,53 @@ Class files with *jar cf something.jar [files]* and then create a
 local Maven Repo for Leiningen:
 http://www.elangocheran.com/blog/2013/03/installing-jar-files-locally-for-leiningen-2/
 
+*** libshout-java
+
+- [[https://github.com/OlegKunitsyn/libshout-java][libshout-java]]
+
+**** Install
+
+Note that putting a Jar into */lib* or using *:resource-paths* in
+project.clj doesn't seem to be the way to go since Leiningen 2.
+***** OS X
+****** Checkout libshout-java
+#+BEGIN_SRC shell
+git clone git@github.com:poochiethecat/libshout-java.git
+cd libshout-java
+brew install ./libshout.rb
+mvn install
+cp ./target/libshout-java.so ~/src/voicerepublic_logorrhoe/target/libshout-java.so
+#+END_SRC
+
+***** Debian
+****** Checkout libshout-java
+
+#+BEGIN_SRC shell
+apt-get install git libshout3-dev maven
+git clone https://github.com/OlegKunitsyn/libshout-java.git
+cd libshout-java
+#+END_SRC
+
+****** Fix a test (otherwise it will not install)
+
+ - Fix the test /testVersion()/ in
+   /src/test/java/com/gmail/kunicins/olegs/libshout/LibshoutTest.java/ to
+   check for your installed version of libshout
+ - It's tested and working with version 2.3.1
+ - Find your version via
+
+#+BEGIN_SRC shell
+apt-cache show libshout3-dev | ag version | egrep -o "2.[0-9].[0-9]"
+#+END_SRC
+
+  - Then install the library to your local maven repository so that
+    `lein deps` can find it
+
+#+BEGIN_SRC shell
+mvn install
+#+END_SRC
+
+***** TODO Move this compiled Library to a HTTP repo so that not every user has to install it to a local repo
 
 ** Development
 
@@ -202,4 +202,4 @@ Installer.
 
 ** License
 
-Copyright © 2016 Voice Republic Media AG
+   Copyright © 2016 Voice Republic Media AG
