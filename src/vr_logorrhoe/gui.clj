@@ -54,10 +54,10 @@
 (def audio-sample-freq-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
 (defn- populate-audio-freq-combo-box []
   (let [col ["22050" "44100" "48000"]]
-        (doall
-         (map #(.addItem audio-sample-freq-combo-box %) col))
-        (.setSelectedIndex audio-sample-freq-combo-box
-                           (utils/index-of (:sample-freq @config/settings) col))))
+    (doall
+     (map #(.addItem audio-sample-freq-combo-box %) col))
+    (.setSelectedIndex audio-sample-freq-combo-box
+                       (utils/index-of (:sample-freq @config/settings) col))))
 
 (def audio-sample-size-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
 (defn- populate-audio-sample-size-combo-box []
