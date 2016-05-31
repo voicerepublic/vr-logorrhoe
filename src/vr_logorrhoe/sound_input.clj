@@ -2,9 +2,11 @@
 ;; http://docs.oracle.com/javase/tutorial/sound/sampled-overview.html
 
 (ns vr-logorrhoe.sound-input
-  (:require [vr-logorrhoe
-             [encoder :refer [encode]]
-             [shout :as shout]])
+  (:require
+   [clj-http.client :as client]
+   [vr-logorrhoe
+    [encoder :refer [encode]]
+    [shout :as shout]])
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream PipedInputStream PipedOutputStream]
            java.lang.Thread
            java.nio.ByteBuffer
@@ -89,7 +91,7 @@
         audio-input-stream (new PipedInputStream)
         audio-output-stream (PipedOutputStream. audio-input-stream)]
 
-    (dotimes [i 30]
+    (dotimes [i 50]
       (let [mic-sample-buffer    (make-array (. Byte TYPE) mic-buffer-size)
             ;; Only required for side-effect
             mic-sample-count (. recorder-line (read mic-sample-buffer 0 mic-buffer-size))
@@ -108,7 +110,29 @@
         (if (= i 9)
           (future
             (prn "Start encoding!")
-            (encode audio-input-stream shout/stream))))
+
+            (encode audio-input-stream #(client/put "http://52.58.189.184/maunz.mp3"
+                                                     {
+                                                      :basic-auth ["source" "zrytpdva"]
+                                                      :multipart [{:name "/foo"
+                                                                   :content %
+                                                                   :length -1}]
+                                                      :headers {
+                                                                ;; :user-agent "vr_shout/0.2.0"
+                                                                ;; :ice-bitrate "256"
+                                                                :content-type "audio/mpeg"
+                                                                ;; :ice-name "VR Server Name"
+                                                                ;; :ice-genre "Rock"
+                                                                ;; :ice-title "VR Title"
+                                                                ;; :ice-url "https://voicerepublic.com"
+                                                                ;; :ice-private "0"
+                                                                ;; :ice-public "1"
+                                                                ;; :ice-description "VR Server Description"
+                                                                ;; :ice-audio-info "ice-samplerate=44100;ice-bitrate=256;ice-channels=1"
+                                                                }
+                                                      })
+                                         )
+            )))
 
       ;; TODO: Call the `drain` method to drain the recorder-line when
       ;; the recording stops. Otherwise the recorded data might seem
