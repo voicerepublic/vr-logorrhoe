@@ -4,7 +4,10 @@
              [chooser :refer :all]
              [core :refer :all]
              [font :refer :all]]
-            [vr-logorrhoe.sound-input :as sound-input]))
+            [vr-logorrhoe
+             [sound-input :as sound-input]
+             [config :as config]]
+            [vr-logorrhoe.utils :as utils]))
 
 (def app-state (atom {:recording false}))
 
@@ -50,9 +53,11 @@
 ;; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
 (def audio-sample-freq-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
 (defn- populate-audio-freq-combo-box []
-  (doall
-   (map #(.addItem audio-sample-freq-combo-box %) ["22050" "44100" "48000"]))
-  (.setSelectedIndex audio-sample-freq-combo-box 1))
+  (let [col ["22050" "44100" "48000"]]
+        (doall
+         (map #(.addItem audio-sample-freq-combo-box %) col))
+        (.setSelectedIndex audio-sample-freq-combo-box
+                           (utils/index-of (:sample-freq @config/settings) col))))
 
 (def audio-sample-size-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
 (defn- populate-audio-sample-size-combo-box []
@@ -99,15 +104,15 @@
     ;; Register actions
     (listen audio-inputs :selection (fn[e]
                                       (when-let [s (selection e)]
-                                        (alert (selection e)))))
+                                        (config/update-setting :recording-device s))))
 
     (listen audio-sample-freq-combo-box :selection (fn[e]
                                                      (when-let [s (selection e)]
-                                                       (alert s))))
+                                                       (config/update-setting :sample-freq s))))
 
     (listen audio-sample-size-combo-box :selection (fn[e]
                                                      (when-let [s (selection e)]
-                                                       (alert s))))
+                                                       (config/update-setting :sample-size s))))
 
     (listen btn :mouse-clicked (fn[e]
                                  (config! btn

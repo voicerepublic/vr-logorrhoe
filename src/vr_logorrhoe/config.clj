@@ -11,16 +11,32 @@
 (def config-file (utils/conj-path config-directory
                                   "settings.edn"))
 
+(def default-config {:recording-device ""
+                     :sample-freq "44100"
+                     :sample-size "16"})
+
 (defn- write-default-config-file []
   "Check whether there's a *re-stream* config folder and config
   file. If not, set those up."
   (if (not (utils/folder-exists? config-directory))
     (utils/create-folder config-directory))
-  (spit config-file { :a 1 }))
+  (spit config-file default-config))
 
+;; `settings` are potential permanent settings like a backup folder
 (def settings (atom (if (utils/path-exists? config-file)
                       (read-string (slurp config-file))
-                      (write-default-config-file))))
+                      (do
+                        (write-default-config-file)
+                        default-config))))
+
+(defn update-setting [key val]
+  (swap! settings assoc key val))
+
+;; (swap! settings conj {:recording-device "Intel [plughw:0,1]"})
+
+;; `config` are ephemeral settings that should not be persisted
+(def config (atom { :foo 1
+                   }))
 
 ;; Whenever the settings of the application changes, save this new
 ;; configuration to the disk

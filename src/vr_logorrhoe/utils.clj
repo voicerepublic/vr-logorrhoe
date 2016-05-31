@@ -52,3 +52,7 @@
   "Takes a list of folders and joins them in regard to the current
   Operating System. Returns the resulting path as a String."
   (str (apply io/file args)))
+
+(defn index-of [item coll]
+  "Returns the index of an item in a collection"
+  (count (take-while (partial not= item) coll)))

@@ -4,6 +4,7 @@
 (ns vr-logorrhoe.sound-input
   (:require [vr-logorrhoe
              [shout :as shout]
+             [config :as config]
              [encoder :refer [encode]]])
   (:import [java.io PipedInputStream PipedOutputStream]
            java.lang.Thread
@@ -31,9 +32,8 @@
   "Returns Mixer Info for a specific recorder, queried by name [String]"
   (:mixer-info (first (filter #(= recorder-name (:name %)) (get-mixer-infos)))))
 
-;; TODO: !! This is hard-coded for my machine right now. !!
 (def recorder-mixer-info
-  (get-recorder-mixer-info "Intel [plughw:0,1]"))
+  (get-recorder-mixer-info (:recording-device @config/settings)))
 
 ;; Get the recorder mixer
 (def recorder-mixer (. AudioSystem (getMixer recorder-mixer-info)))
