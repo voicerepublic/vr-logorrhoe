@@ -3,9 +3,9 @@
 
 (ns vr-logorrhoe.sound-input
   (:require [vr-logorrhoe
-             [shout :as shout]
              [config :as config]
-             [encoder :refer [encode]]])
+             [encoder :refer [encode]]
+             [shout :as shout]])
   (:import [java.io PipedInputStream PipedOutputStream]
            java.lang.Thread
            java.nio.ByteBuffer

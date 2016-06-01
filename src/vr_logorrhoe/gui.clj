@@ -5,9 +5,9 @@
              [core :refer :all]
              [font :refer :all]]
             [vr-logorrhoe
+             [config :as config]
              [sound-input :as sound-input]
-             [config :as config]]
-            [vr-logorrhoe.utils :as utils]))
+             [utils :as utils]]))
 
 (def app-state (atom {:recording false}))
 

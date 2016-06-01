@@ -1,6 +1,6 @@
 (ns vr-logorrhoe.utils
-  (:import [java.io BufferedReader InputStreamReader])
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io])
+  (:import [java.io BufferedReader InputStreamReader]))
 
 (defn get-declared-methods [obj]
   "Get declared methods on `obj` through Java Reflection"
