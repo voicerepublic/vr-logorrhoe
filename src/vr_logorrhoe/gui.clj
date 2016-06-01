@@ -48,29 +48,22 @@
   (config! f :content content)
   content)
 
-;; TODO: Generalise the creation of the audio settings combo-boxes
-;; TODO: Add the other audio-format configuration parameters
-;; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
-(def audio-sample-freq-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
-(defn- populate-audio-freq-combo-box []
-  (let [col ["22050" "44100" "48000"]]
-    (doall
-     (map #(.addItem audio-sample-freq-combo-box %) col))
-    (.setSelectedIndex audio-sample-freq-combo-box
-                       (utils/index-of (:sample-freq @config/settings) col))))
+(defn- create-combo-box []
+  "Creates a new JComboBox seesaw-widget"
+  (seesaw.core/make-widget (new javax.swing.JComboBox)))
 
-(def audio-sample-size-combo-box (seesaw.core/make-widget (new javax.swing.JComboBox)))
-(defn- populate-audio-sample-size-combo-box []
+(defn- populate-combo-box [combo-box col selected-element-pos]
+  "Populates a `combo-box` with a collection `col` and pre-selects the
+  element at position `selected-element-pos`"
   (doall
-   (map #(.addItem audio-sample-size-combo-box %) ["16" "24" "32"])))
+   (map #(.addItem combo-box %) col))
+  (.setSelectedIndex combo-box
+                     selected-element-pos))
 
 (defn start []
   (invoke-later
    (-> f pack! show! ))
   (config f :title)
-
-  (populate-audio-freq-combo-box)
-  (populate-audio-sample-size-combo-box)
 
   (let [logo (label
               :icon (java.io.File. (:logo icons)))
@@ -82,8 +75,12 @@
         btn (label
              :icon (java.io.File. (:rec icons)))
         audio-inputs (listbox :model (sound-input/get-mixer-names))
+        ;; TODO: Add the other audio-format configuration parameters
+        ;; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
+        audio-sample-freq-combo-box (create-combo-box)
         audio-sample-freq (left-right-split (label :text "Frequency")
                                             audio-sample-freq-combo-box)
+        audio-sample-size-combo-box (create-combo-box)
         audio-sample-size (left-right-split (label :text "Sample Size")
                                             audio-sample-size-combo-box)
         audio-format (flow-panel
@@ -93,7 +90,19 @@
                               audio-sample-size])
         left-main (top-bottom-split audio-format
                                     (scrollable audio-inputs))
-        main (left-right-split left-main btn :divider-location 1/3)]
+        main (left-right-split left-main btn :divider-location 1/3)
+        freq-col ["22050" "44100" "48000"]
+        sample-size-col ["16" "24" "32"]]
+
+    (selection! audio-inputs (:recording-device @config/settings))
+
+    (populate-combo-box audio-sample-freq-combo-box
+                        freq-col
+                        (utils/index-of (:sample-freq @config/settings) freq-col))
+
+    (populate-combo-box audio-sample-size-combo-box
+                        sample-size-col
+                        (utils/index-of (:sample-size @config/settings) sample-size-col))
 
     (display (border-panel
               :north (horizontal-panel :items [logo (label :text "       ") title])
