@@ -20,13 +20,6 @@
 ;; as possible
 (native!)
 
-;; Setup the one frame to hold the whole GUI
-(def f (frame :title "VR - *re:stream*"
-              :menubar
-              (menubar :items
-                       [(menu :text "File" :items [backup-folder-action exit-action])
-                        (menu :text "Help" :items [help-action])])))
-
 ;; Helper functions
 (defn- create-combo-box []
   "Creates a new JComboBox seesaw-widget"
@@ -59,6 +52,13 @@
                                                                  (alert (str "Selected: " (.getAbsolutePath file))))))
                            :name "Choose Backup Folder"
                            :tip  "Choose Backup Folder"))
+
+;; Setup the one frame to hold the whole GUI
+(def f (frame :title "VR - *re:stream*"
+              :menubar
+              (menubar :items
+                       [(menu :text "File" :items [backup-folder-action exit-action])
+                        (menu :text "Help" :items [help-action])])))
 
 (defn start []
   "Starts the GUI"
