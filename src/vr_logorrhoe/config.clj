@@ -13,7 +13,8 @@
 
 (def default-config {:recording-device ""
                      :sample-freq "44100"
-                     :sample-size "16"})
+                     :sample-size "16"
+                     :audio-channels "2"})
 
 (defn- write-default-config-file []
   "Check whether there's a *re-stream* config folder and config
