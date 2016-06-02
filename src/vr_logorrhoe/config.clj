@@ -8,7 +8,7 @@
 (def app-name "vr-logorrhoe")
 
 (def config-directory (utils/conj-path user-home
-                                         (str "." app-name)))
+                                       (str "." app-name)))
 
 (def config-file (utils/conj-path config-directory
                                   "settings.edn"))
@@ -44,5 +44,5 @@
 ;; Whenever the settings of the application changes, save this new
 ;; configuration to the disk
 (add-watch settings :watcher
-  (fn [key atom old-state new-state]
-    (spit config-file @atom)))
+           (fn [key atom old-state new-state]
+             (spit config-file @atom)))
