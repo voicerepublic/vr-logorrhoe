@@ -5,16 +5,16 @@
   (:require [vr-logorrhoe
              [config :as config]
              [encoder :refer [encode]]
-             [shout :as shout]])
+             [shout :as shout]
+             [utils :as utils]])
   (:import [java.io PipedInputStream PipedOutputStream]
            java.lang.Thread
            java.nio.ByteBuffer
-           [javax.sound.sampled AudioFormat AudioSystem LineListener]))
+           [javax.sound.sampled AudioFormat AudioSystem DataLine$Info LineListener TargetDataLine]))
 
 (defn- get-mixer-info []
   "Retrieve supported mixers from OS"
   (seq (. AudioSystem (getMixerInfo))))
-
 
 (defn- get-mixer-infos []
   "Returns mixer-info, name, description of each mixer"
@@ -38,10 +38,18 @@
 ;; Get the recorder mixer
 (def recorder-mixer (. AudioSystem (getMixer recorder-mixer-info)))
 
-;; Get the supported target line for the mixer
-(def target-line-info (first (seq (. recorder-mixer (getTargetLineInfo)))))
+;; Create a RAW data format. It can be played like this:
+;;   aplay -t raw clojure.wav -c 1 -r 44100 -f S16_LE
+;; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
+(def audio-format (new AudioFormat (utils/parse-int (:sample-freq @config/settings))
+                       (utils/parse-int (:sample-size @config/settings))
+                       (utils/parse-int (:audio-channels @config/settings))
+                       true false))
 
-;; Get a target line
+;; Get supported target line info
+(def target-line-info (new DataLine$Info TargetDataLine audio-format))
+
+;; Get a target line from the mixer
 (def recorder-line (try
                      (. recorder-mixer
                         (getLine target-line-info))
@@ -57,11 +65,6 @@
                       (do (print "Event: " (. evt (getType)))
                           (newline)
                           (. *out* (flush)))))))
-
-;; Create a RAW data format. It can be played like this:
-;;   aplay -t raw clojure.wav -c 1 -r 44100 -f S16_LE
-;; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
-(def audio-format (new AudioFormat 44100 16 1 true false))
 
 ;; The size of the buffer is deliberately 1/5th of the lines
 ;; buffer. Otherwise there's a racing condition between the mixer

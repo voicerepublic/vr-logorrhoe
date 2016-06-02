@@ -56,3 +56,7 @@
 (defn index-of [item coll]
   "Returns the index of an item in a collection"
   (count (take-while (partial not= item) coll)))
+
+(defn parse-int [s]
+  "Casts a String into an Int"
+  (. Integer (parseInt s)))
