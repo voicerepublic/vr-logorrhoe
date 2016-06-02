@@ -1,5 +1,8 @@
 (ns vr-logorrhoe.shout
-  (:require [clj-http.client :as client]))
+  (:require
+   [vr-logorrhoe
+    [config :as config]]
+   [clj-http.client :as client]))
 
 (def shout-config (atom {:host "52.58.150.45"
                          :port 80
@@ -14,10 +17,14 @@
                             :content input-stream
                             :length -1}]
                :headers {
-                         ;; :user-agent "vr_shout/0.2.0"
-                         ;; :ice-bitrate "256"
-                         ;; :content-type "application/ogg"
+                         :ice-bitrate "256"
                          :content-type "audio/mpeg"
+                         :ice-audio-info (str "ice-samplerate="
+                                              (:sample-freq @config/settings)
+                                              ";ice-bitrate=256;ice-channels="
+                                              (:audio-channels @config/settings))
+                         ;; :user-agent "vr_shout/0.2.0"
+                         ;; :content-type "application/ogg"
                          ;; :ice-name "VR Server Name"
                          ;; :ice-genre "Rock"
                          ;; :ice-title "VR Title"
@@ -25,6 +32,5 @@
                          ;; :ice-private "0"
                          ;; :ice-public "1"
                          ;; :ice-description "VR Server Description"
-                         ;; :ice-audio-info "ice-samplerate=44100;ice-bitrate=256;ice-channels=1"
                          }
                }))

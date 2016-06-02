@@ -93,7 +93,7 @@
         audio-input-stream (new PipedInputStream)
         audio-output-stream (PipedOutputStream. audio-input-stream)]
 
-    (dotimes [i 50]
+    (dotimes [i 250]
       (let [mic-sample-buffer    (make-array (. Byte TYPE) mic-buffer-size)
             ;; Only required for side-effect
             mic-sample-count (. recorder-line (read mic-sample-buffer 0 mic-buffer-size))
