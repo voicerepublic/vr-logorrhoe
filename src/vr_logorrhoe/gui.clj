@@ -88,7 +88,6 @@
         audio-channels (left-right-split (label :text "Channels")
                                             audio-channels-combo-box)
         audio-format (flow-panel
-                      ;; :align :left
                       :hgap 20
                       :items [audio-sample-freq
                               audio-sample-size
