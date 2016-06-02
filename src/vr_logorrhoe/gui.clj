@@ -96,7 +96,7 @@
         left-main (top-bottom-split audio-format
                                     (scrollable audio-inputs))
 
-        main (left-right-split left-main record-button :divider-location 1/2.5)
+        main (left-right-split left-main record-button :divider-location (/ 1 2.05))
         freq-col ["22050" "44100" "48000"]
         channels-col ["1" "2"]
         sample-size-col ["16" "24" "32"]]
