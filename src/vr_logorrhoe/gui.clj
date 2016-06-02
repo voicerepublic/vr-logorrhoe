@@ -20,13 +20,6 @@
 ;; as possible
 (native!)
 
-;; Setup the one frame to hold the whole GUI
-(def f (frame :title "VR - *re:stream*"
-              :menubar
-              (menubar :items
-                       [(menu :text "File" :items [backup-folder-action exit-action])
-                        (menu :text "Help" :items [help-action])])))
-
 ;; Helper functions
 (defn- create-combo-box []
   "Creates a new JComboBox seesaw-widget"
@@ -60,6 +53,13 @@
                            :name "Choose Backup Folder"
                            :tip  "Choose Backup Folder"))
 
+;; Setup the one frame to hold the whole GUI
+(def f (frame :title "VR - *re:stream*"
+              :menubar
+              (menubar :items
+                       [(menu :text "File" :items [backup-folder-action exit-action])
+                        (menu :text "Help" :items [help-action])])))
+
 (defn start []
   "Starts the GUI"
   (invoke-later
@@ -69,7 +69,7 @@
   (let [logo (label
               :icon (java.io.File. (:logo icons)))
         title (label
-               :text "VR - *re:stream* - Venue Title"
+               :text "VR - *re:stream*"
                :font (font :name :monospaced
                            :style #{:bold}
                            :size 34))
@@ -145,7 +145,11 @@
                                                                  (:rec icons))))
                                  (swap! app-state
                                         assoc :recording
-                                        (not (:recording @app-state)))))))
+                                        (not (:recording @app-state))))))
+
+  ;; Set size after everything else is in the frame, otherwise the
+  ;; size in Windows will be set to 0x0 anyway.
+  (config! f :size [640 :by 480]))
 
 
 ;; (start)
