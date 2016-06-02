@@ -1,10 +1,10 @@
 (ns vr-logorrhoe.shout
   (:require [clj-http.client :as client]))
 
-(def shout-config (atom {:host "52.29.75.26"
+(def shout-config (atom {:host "52.58.150.45"
                          :port 80
-                         :password "sxoneagh"
-                         :mount "9da13579-bcb2-45fc-8254-0c8364bfcca2"}))
+                         :password "pwogaeyd"
+                         :mount "5fa60d02-991c-44c4-9882-656522faa605"}))
 
 (defn stream [input-stream]
   (client/put (str "http://" (:host @shout-config) "/" (:mount @shout-config))

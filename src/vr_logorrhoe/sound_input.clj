@@ -2,7 +2,8 @@
 ;; http://docs.oracle.com/javase/tutorial/sound/sampled-overview.html
 
 (ns vr-logorrhoe.sound-input
-  (:require [vr-logorrhoe
+  (:require [clojure.java.io :as io]
+            [vr-logorrhoe
              [config :as config]
              [encoder :refer [encode]]
              [shout :as shout]
@@ -88,7 +89,7 @@
   ;; Start Audio Capture
   (. recorder-line (start))
 
-  (let [raw-file (.getChannel (java.io.FileOutputStream. "clojure.wav"))
+  (let [raw-file (.getChannel (java.io.FileOutputStream. "tmp.wav"))
         audio-input-stream (new PipedInputStream)
         audio-output-stream (PipedOutputStream. audio-input-stream)]
 
@@ -111,9 +112,10 @@
         (if (= i 9)
           (future
             (prn "Start encoding!")
-
-            (encode audio-input-stream #(shout/stream %)
-            ))))
+            ;; TODO: Duplicate input-stream so that it can be shouted
+            ;; and persisted locally.
+            (encode audio-input-stream #(;(io/copy % (io/file "tmp.mp3"))
+                                         (shout/stream %))))))
 
       ;; TODO: Call the `drain` method to drain the recorder-line when
       ;; the recording stops. Otherwise the recorded data might seem
