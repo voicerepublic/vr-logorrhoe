@@ -1,6 +1,8 @@
 (ns vr-logorrhoe.config
   (:require [vr-logorrhoe.utils :as utils]))
 
+;; TODO: In Windows10 this yields "/tmp" on the first run, when called
+;; a second time it yields the correct value. Strange stuff.
 (def user-home (System/getProperty "user.home"))
 
 (def app-name "vr-logorrhoe")
