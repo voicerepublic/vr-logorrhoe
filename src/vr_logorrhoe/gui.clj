@@ -95,7 +95,8 @@
                               audio-channels])
         left-main (top-bottom-split audio-format
                                     (scrollable audio-inputs))
-        main (left-right-split left-main record-button :divider-location 1/3)
+
+        main (left-right-split left-main record-button :divider-location 1/2.5)
         freq-col ["22050" "44100" "48000"]
         channels-col ["1" "2"]
         sample-size-col ["16" "24" "32"]]
@@ -149,7 +150,7 @@
 
   ;; Set size after everything else is in the frame, otherwise the
   ;; size in Windows will be set to 0x0 anyway.
-  (config! f :size [640 :by 480]))
+  (config! f :size [750 :by 500]))
 
 
 ;; (start)
