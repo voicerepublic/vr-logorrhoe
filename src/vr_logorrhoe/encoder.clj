@@ -1,11 +1,27 @@
 (ns vr-logorrhoe.encoder
-  (:require [clojure.java.shell2 :refer [sh]]))
+  (:require
+   [vr-logorrhoe
+    [config :as config]]
+    [clojure.java.shell2 :refer [sh]]))
+
+(defn- lame-freq []
+  "Map between Hz and lame KHz notation"
+  (get {"44100" "44.1"
+        "22050" "22.05"
+        "48000" "48"}
+       (:sample-freq @config/settings)))
+
+(defn- lame-mode []
+  "Lame mode is either mono or 'joint stereo'. See `man lame` for
+  details"
+  (case (:audio-channels @config/settings)
+    "1" "m"
+    "2" "j"))
 
 (defn encode [input callback]
   "Encodes an input-stream using `lame` and pipes the result into the
   `callback` function"
-  ;; TODO: Read frequency and bitwidth from @config
-  (sh "lame" "-r" "--cbr" "-b" "256" "-s" "44.1" "--bitwidth" "16" "--signed" "--little-endian" "-m" "m" "-" "-"
+  (sh "lame" "-r" "--cbr" "-b" "256" "-s" (lame-freq) "--bitwidth" (:sample-size @config/settings) "--signed" "--little-endian" "-m" (lame-mode) "-" "-"
       :in input
       :err #(do (prn "lame has written to stderr!")
                 ;; TODO: `print-input-stream` doesn't print anything
