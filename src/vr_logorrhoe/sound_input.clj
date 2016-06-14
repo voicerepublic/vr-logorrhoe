@@ -3,6 +3,10 @@
 
 (ns vr-logorrhoe.sound-input
   (:require [clojure.java.io :as io]
+            [clojure.core.async
+             :as a
+             :refer [>! <! >!! <!! go chan buffer close! thread
+                     alts! alts!! timeout]]
             [vr-logorrhoe
              [config :as config]
              [encoder :refer [encode]]

@@ -12,7 +12,7 @@
        (:sample-freq @config/settings)))
 
 (defn- lame-mode []
-  "Lame mode is either mono or 'joint stereo'. See `man lame` for
+  "Lame mode is either 'mono' or 'joint stereo'. See `man lame` for
   details"
   (case (:audio-channels @config/settings)
     "1" "m"
