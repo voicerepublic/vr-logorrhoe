@@ -144,8 +144,8 @@
 
               (config! record-button
                        :text (if (:record-button @config/app-state)
-                               "Record"
-                               "Stop"))
+                               "Stop"
+                               "Record"))
 
               (future
                 (if (:record-button @config/app-state)
