@@ -176,6 +176,7 @@ of the responsible Clojure file. Documentation on how to achieve this
 can be found [[http://asymmetrical-view.com/2010/06/08/building-standalone-jars-wtih-leiningen.html][here]].
 
 #+BEGIN_SRC sh
+# lein compile
 lein uberjar
 #+END_SRC sh
 
@@ -197,6 +198,16 @@ java -jar target/clojure_desktop_app_demo-0.1.0-SNAPSHOT-standalone.jar
 
 The resulting JAR file is ready to be packaged into a Mac OS X
 Installer.
+
+#+BEGIN_SRC sh
+mkdir /tmp/vr-restream
+cp target/*standalone.jar /tmp/vr-restream/vr-restream.jar
+ln -s /Applications /tmp/vr-restream/Applications
+hdiutil create -srcfolder /tmp/vr-restream /tmp/vr-restream.dmg
+#+END_SRC
+
+#+RESULTS:
+: created: /tmp/vr-restream.dmg
 
 *** TODO Write literate documentation on how to achieve this using [[http://centerkey.com/mac/java/][this]] as reference
 

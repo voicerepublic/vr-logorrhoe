@@ -7,8 +7,8 @@
                  [com.climate/java.shell2 "0.1.0"]
                  [clj-http "2.1.0"]
                  [org.clojure/clojure "1.8.0"]]
+  :aot [vr-logorrhoe.core]
   :main vr-logorrhoe.core
-
   :repositories [["java.net" "http://download.java.net/maven/2"]
                  ["sonatype" {:url "http://oss.sonatype.org/content/repositories/releases"
                               ;; If a repository contains releases only setting

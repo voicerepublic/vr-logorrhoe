@@ -1,5 +1,6 @@
 (ns vr-logorrhoe.gui
   (:require [clojure.java.browse :refer [browse-url]]
+            [clojure.java.io :as io]
             [seesaw
              [chooser :refer :all]
              [core :refer :all]
@@ -12,9 +13,7 @@
 ;; Declare initial state
 (swap! config/app-state assoc :record-button false)
 
-(def icons {:rec  "resources/rec.png"
-            :stop "resources/stop.png"
-            :logo "resources/logo.png"})
+(def icons {:logo (io/file "resources/img/logo.png")})
 
 ;; Before any UI is created, tell seesaw to make things look as native
 ;; as possible
@@ -67,14 +66,13 @@
   (config f :title)
 
   (let [logo (label
-              :icon (java.io.File. (:logo icons)))
+              :icon (:logo icons))
         title (label
                :text "VR - *re:stream*"
                :font (font :name :monospaced
                            :style #{:bold}
                            :size 34))
-        record-button (label
-             :icon (java.io.File. (:rec icons)))
+        record-button (button :text "Record")
         audio-inputs (listbox :model (sound-input/get-mixer-names))
         ;; TODO: Add the other audio-format configuration parameters
         ;; -> int channels, boolean signed, boolean bigEndian
@@ -142,23 +140,17 @@
             :mouse-clicked
             (fn[e]
 
-              (prn "Swapping the :record-button content")
               (swap! config/app-state update :record-button not)
 
-              (prn "Setting :record-button")
               (config! record-button
-                       :icon (java.io.File. (if (:record-button @config/app-state)
-                                              (:stop icons)
-                                              (:rec icons))))
+                       :text (if (:record-button @config/app-state)
+                               "Record"
+                               "Stop"))
 
-              (prn "Starting into the future")
               (future
-                (prn "Starting or Stopping recording")
                 (if (:record-button @config/app-state)
                   (sound-input/start-recording)
-                  (sound-input/stop-recording)))
-
-              )))
+                  (sound-input/stop-recording))))))
 
   ;; Set size after everything else is in the frame, otherwise the
   ;; size in Windows will be set to 0x0 anyway.

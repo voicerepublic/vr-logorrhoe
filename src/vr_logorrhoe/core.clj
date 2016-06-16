@@ -1,12 +1,6 @@
 (ns vr-logorrhoe.core
-  (:gen-class)
-  (:require [vr-logorrhoe.gui :as gui]))
+  (:require [vr-logorrhoe.gui :as gui])
+  (:gen-class))
 
 (defn -main [& args]
   (gui/start))
-
-
-
-
-
-;; (-main)
