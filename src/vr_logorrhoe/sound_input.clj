@@ -3,10 +3,6 @@
 
 (ns vr-logorrhoe.sound-input
   (:require [clojure.java.io :as io]
-            [clojure.core.async
-             :as a
-             :refer [>! <! >!! <!! go chan buffer close! thread
-                     alts! alts!! timeout]]
             [vr-logorrhoe
              [config :as config]
              [encoder :refer [encode]]
@@ -82,27 +78,27 @@
   (future
     (.write file buffer)))
 
-(defn record []
-  "Opens the specified Microphone port, starts collecting audio
-  samples from it, encodes it with `lame`, writes a raw and a mp3 file
-  and streams the mp3 audio samples via HTTP PUT."
+(defn- record []
+  "Starts collecting audio samples from it, encodes it with `lame`,
+  writes a raw and a mp3 file and streams the mp3 audio samples via
+  HTTP PUT."
 
-  ;; Open the Port
-  (. recorder-line (open audio-format mic-buffer-size))
+  (prn "Entering `record` function")
 
-  ;; Start Audio Capture
-  (. recorder-line (start))
+  (swap! config/app-state assoc :audio-samples-count 0)
 
   (let [raw-file (.getChannel (java.io.FileOutputStream. "tmp.wav"))
         audio-input-stream (new PipedInputStream)
         audio-output-stream (PipedOutputStream. audio-input-stream)]
 
-    (dotimes [i 250]
+    (while (:recording @config/app-state)
       (let [mic-sample-buffer    (make-array (. Byte TYPE) mic-buffer-size)
             ;; Only required for side-effect
             mic-sample-count (. recorder-line (read mic-sample-buffer 0 mic-buffer-size))
             ;; Current sample
             mic-sample-bbyte (. ByteBuffer (wrap mic-sample-buffer))]
+
+        (swap! config/app-state update :audio-samples-count inc)
 
         (future
           (.write audio-output-stream mic-sample-buffer 0 mic-sample-count))
@@ -113,7 +109,7 @@
         ;; Give the audio buffer a little heads-up before starting to
         ;; encode and stream. Otherwise the buffer will be depleted
         ;; quickly and the encoding/streaming process will terminate!
-        (if (= i 9)
+        (if (= (:audio-samples-count @config/app-state) 9)
           (future
             (prn "Start encoding!")
             ;; TODO: Duplicate input-stream so that it can be shouted
@@ -126,6 +122,7 @@
       ;; to end pre-maturely.
       (. Thread (sleep 20)))
 
+
     ;; stop reading from the input line
     (. recorder-line (stop))
 
@@ -134,9 +131,35 @@
 
     (.close raw-file)))
 
+(defn start-recording []
+  "Opens the specified Microphone port and starts the actual recording."
+
+  (prn "start-recording")
+
+  (future
+    (swap! config/app-state assoc :recording true)
+
+    ;; Open the Port
+    (. recorder-line (open audio-format mic-buffer-size))
+
+    ;; Start Audio Capture
+    (. recorder-line (start))
+
+    (record)))
+
+(defn stop-recording []
+  "Sets a magic-var so that the `record` function knows to end the
+  recording."
+
+  (prn "stop-recording")
+  (swap! config/app-state assoc :recording false))
+
+
+
 (comment
   (try
-    (record)
+    (start-recording)
+    (stop-recording)
     (catch Exception e
       (println "Caught: " e)
       (. recorder-line (stop))

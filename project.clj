@@ -6,7 +6,6 @@
   :dependencies [[seesaw "1.4.5"]
                  [com.climate/java.shell2 "0.1.0"]
                  [clj-http "2.1.0"]
-                 [org.clojure/core.async "0.2.374"]
                  [org.clojure/clojure "1.8.0"]]
   :main vr-logorrhoe.core
 

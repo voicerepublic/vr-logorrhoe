@@ -2,7 +2,9 @@
   (:require [vr-logorrhoe.utils :as utils]))
 
 ;; TODO: This yields "/tmp" on the first run, when called a second
-;; time it yields the correct value. Strange stuff.
+;; time it yields the correct value. Strange stuff.  Just doing it
+;; twice here, even with some seconds of sleep in between is not
+;; cutting it, tough!
 (def user-home (System/getProperty "user.home"))
 
 (def app-name "vr-logorrhoe")
@@ -25,7 +27,8 @@
     (utils/create-folder config-directory))
   (spit config-file default-config))
 
-;; `settings` are potential permanent settings like a backup folder
+;; `settings` are permanent settings like a backup folder that will
+;; also be persisted in the config file.
 (def settings (atom (if (utils/path-exists? config-file)
                       (read-string (slurp config-file))
                       (do
@@ -35,14 +38,22 @@
 (defn update-setting [key val]
   (swap! settings assoc key val))
 
-;; (swap! settings conj {:recording-device "Intel [plughw:0,1]"})
-
-;; `config` are ephemeral settings that should not be persisted
-(def config (atom { :foo 1
-                   }))
+;; `app-state` are ephemeral settings that should not be persisted
+(def app-state (atom {}))
 
 ;; Whenever the settings of the application changes, save this new
 ;; configuration to the disk
 (add-watch settings :watcher
            (fn [key atom old-state new-state]
              (spit config-file @atom)))
+
+;; Whenever the settings of the application changes, save this new
+;; configuration to the disk
+(add-watch settings :settings-watcher
+           (fn [key atom old-state new-state]
+             (spit config-file @atom)))
+
+;; Whenever the app-state changes, print the change
+(add-watch app-state :app-state-watcher
+           (fn [key atom old-state new-state]
+             (prn "app state changed to: " @atom)))

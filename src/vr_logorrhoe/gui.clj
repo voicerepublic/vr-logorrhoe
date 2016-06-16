@@ -9,8 +9,8 @@
              [sound-input :as sound-input]
              [utils :as utils]]))
 
-;; Declare some state
-(def app-state (atom {:recording false}))
+;; Declare initial state
+(swap! config/app-state assoc :record-button false)
 
 (def icons {:rec  "resources/rec.png"
             :stop "resources/stop.png"
@@ -138,14 +138,27 @@
                                                      (when-let [s (selection e)]
                                                        (config/update-setting :sample-size s))))
 
-    (listen record-button :mouse-clicked (fn[e]
-                                 (config! record-button
-                                          :icon (java.io.File. (if (:recording @app-state)
-                                                                 (:stop icons)
-                                                                 (:rec icons))))
-                                 (swap! app-state
-                                        assoc :recording
-                                        (not (:recording @app-state))))))
+    (listen record-button
+            :mouse-clicked
+            (fn[e]
+
+              (prn "Swapping the :record-button content")
+              (swap! config/app-state update :record-button not)
+
+              (prn "Setting :record-button")
+              (config! record-button
+                       :icon (java.io.File. (if (:record-button @config/app-state)
+                                              (:stop icons)
+                                              (:rec icons))))
+
+              (prn "Starting into the future")
+              (future
+                (prn "Starting or Stopping recording")
+                (if (:record-button @config/app-state)
+                  (sound-input/start-recording)
+                  (sound-input/stop-recording)))
+
+              )))
 
   ;; Set size after everything else is in the frame, otherwise the
   ;; size in Windows will be set to 0x0 anyway.
