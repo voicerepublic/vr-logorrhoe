@@ -181,12 +181,6 @@ lein uberjar
 #+END_SRC sh
 
 #+RESULTS:
-| Warning: | specified                                                                                                             | :main    | without | including | it  | in      | :aot.    |           |        |      |      |      |      |
-| Implicit | AOT                                                                                                                   | of       | :main   | will      | be  | removed | in       | Leiningen | 3.0.0. |      |      |      |      |
-| If       | you                                                                                                                   | only     | need    | AOT       | for | your    | uberjar, | consider  | adding | :aot | :all | into | your |
-| :uberjar | profile                                                                                                               | instead. |         |           |     |         |          |           |        |      |      |      |      |
-| Created  | /Users/preek/src/voicerepublic/clojure_desktop_app_demo/target/clojure_desktop_app_demo-0.1.0-SNAPSHOT.jar            |          |         |           |     |         |          |           |        |      |      |      |      |
-| Created  | /Users/preek/src/voicerepublic/clojure_desktop_app_demo/target/clojure_desktop_app_demo-0.1.0-SNAPSHOT-standalone.jar |          |         |           |     |         |          |           |        |      |      |      |      |
 
 When curious, try starting the jar manually
 
@@ -199,7 +193,13 @@ java -jar target/clojure_desktop_app_demo-0.1.0-SNAPSHOT-standalone.jar
 The resulting JAR file is ready to be packaged into a Mac OS X
 Installer.
 
+**** By hand
+
+This is more for testing purposes since you will still need the JRE
+installed.
+
 #+BEGIN_SRC sh
+rm -rf /tmp/vr-restream /tmp/vr-restream.dmg
 mkdir /tmp/vr-restream
 cp target/*standalone.jar /tmp/vr-restream/vr-restream.jar
 ln -s /Applications /tmp/vr-restream/Applications
@@ -209,7 +209,29 @@ hdiutil create -srcfolder /tmp/vr-restream /tmp/vr-restream.dmg
 #+RESULTS:
 : created: /tmp/vr-restream.dmg
 
-*** TODO Write literate documentation on how to achieve this using [[http://centerkey.com/mac/java/][this]] as reference
+**** Using the /javapackager/ tool
+
+The following script is based on [[http://centerkey.com/mac/java/][this]] tutorial.
+
+#+BEGIN_SRC sh
+cd target
+rm *iconset
+rm -rf package deploy
+mkdir vr-restream.iconset
+sips -z 128 128 ../resources/img/logo.png --out vr-restream.iconset/icon_128x128.png
+iconutil --convert icns vr-restream.iconset
+mkdir -p package/macosx
+cp vr-restream.icns package/macosx
+jdk=$(/usr/libexec/java_home)
+$jdk/bin/javapackager -version
+$jdk/bin/javapackager -deploy -native dmg \
+   -srcfiles vr_logorrhoe-0.1.0-SNAPSHOT-standalone.jar -appclass vr_logorrhoe.core -name vr-restream \
+   -outdir deploy -outfile vr-restream -v
+#+END_SRC
+
+After a good while (there's code signing going on), you will find a
+dmg file sitting in the deploy/bundles directory.
+
 
 ** License
 
