@@ -1,7 +1,8 @@
 (ns vr-logorrhoe.encoder
   (:require
    [vr-logorrhoe
-    [config :as config]]
+    [config :as config]
+    [logger :refer [log]]]
     [clojure.java.shell2 :refer [sh]]))
 
 (defn- lame-freq []
@@ -23,7 +24,7 @@
   `callback` function"
   (sh "lame" "-r" "--cbr" "-b" "256" "-s" (lame-freq) "--bitwidth" (:sample-size @config/settings) "--signed" "--little-endian" "-m" (lame-mode) "-" "-"
       :in input
-      :err #(do (prn "lame has written to stderr!")
+      :err #(do (log "lame has written to stderr!")
                 ;; TODO: `print-input-stream` doesn't print anything
                 ;; useful for this type of InputStream as of now.
                 (vr-logorrhoe.utils/print-input-stream %))

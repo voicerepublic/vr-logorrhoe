@@ -1,5 +1,7 @@
 (ns vr-logorrhoe.config
-  (:require [vr-logorrhoe.utils :as utils]))
+  (:require [vr-logorrhoe
+             [logger :refer [log]]
+             [utils :as utils]]))
 
 ;; TODO: This yields "/tmp" on the first run, when called a second
 ;; time it yields the correct value. Strange stuff.  Just doing it
@@ -59,4 +61,4 @@
 ;; Whenever the app-state changes, print the change
 (add-watch app-state :app-state-watcher
            (fn [key atom old-state new-state]
-             (prn "app state changed to: " @atom)))
+             (log "app state changed to: " @atom)))

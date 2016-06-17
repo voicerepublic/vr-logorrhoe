@@ -5,6 +5,7 @@
   (:require [clojure.java.io :as io]
             [vr-logorrhoe
              [config :as config]
+             [logger :refer [log]]
              [encoder :refer [encode]]
              [shout :as shout]
              [utils :as utils]])
@@ -83,7 +84,7 @@
   writes a raw and a mp3 file and streams the mp3 audio samples via
   HTTP PUT."
 
-  (prn "Entering `record` function")
+  (log "Entering `record` function")
 
   (swap! config/app-state assoc :audio-samples-count 0)
 
@@ -111,7 +112,7 @@
         ;; quickly and the encoding/streaming process will terminate!
         (if (= (:audio-samples-count @config/app-state) 9)
           (future
-            (prn "Start encoding!")
+            (log "Start encoding!")
             ;; TODO: Duplicate input-stream so that it can be shouted
             ;; and persisted locally.
             (encode audio-input-stream #(;(io/copy % (io/file "tmp.mp3"))
@@ -134,7 +135,7 @@
 (defn start-recording []
   "Opens the specified Microphone port and starts the actual recording."
 
-  (prn "start-recording")
+  (log "start-recording")
 
   (future
     (swap! config/app-state assoc :recording true)
@@ -151,7 +152,7 @@
   "Sets a magic-var so that the `record` function knows to end the
   recording."
 
-  (prn "stop-recording")
+  (log "stop-recording")
   (swap! config/app-state assoc :recording false))
 
 

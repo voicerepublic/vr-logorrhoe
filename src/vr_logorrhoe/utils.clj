@@ -1,5 +1,6 @@
 (ns vr-logorrhoe.utils
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [vr-logorrhoe.logger :refer [log]])
   (:import [java.io BufferedReader InputStreamReader]))
 
 (defn get-declared-methods [obj]
@@ -9,17 +10,17 @@
 
 (defn print-input-stream [input-stream]
   "Helper function to print an InputStream to the REPL"
-  (prn "Printing input-stream: " input-stream)
+  (log "Printing input-stream: " input-stream)
   (try
     (let [in (new BufferedReader (new InputStreamReader input-stream))]
       (loop []
         (let [line (.readLine in)]
           (if (not (= line nil))
-            (prn line)
+            (log line)
             (recur))))
       (.close input-stream))
     (catch Exception e
-      (println "Caught: " e))))
+      (log "Caught: " e))))
 
 (defn path-exists? [path]
   (.exists (io/file path)))

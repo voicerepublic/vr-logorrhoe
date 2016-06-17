@@ -1,15 +1,16 @@
 (ns vr-logorrhoe.gui
-  (:require [clojure.java.browse :refer [browse-url]]
-            [clojure.java.io :as io]
+  (:require [clojure.java
+             [browse :refer [browse-url]]
+             [io :as io]]
             [seesaw
              [chooser :refer :all]
              [core :refer :all]
              [font :refer :all]]
             [vr-logorrhoe
              [config :as config]
+             [shout :as shout]
              [sound-input :as sound-input]
-             [utils :as utils]]
-            [vr-logorrhoe.shout :as shout]))
+             [utils :as utils]]))
 
 ;; Declare initial state
 (swap! config/app-state assoc :record-button false)
