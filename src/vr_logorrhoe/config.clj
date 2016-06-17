@@ -19,6 +19,7 @@
 (def default-config {:recording-device ""
                      :sample-freq "44100"
                      :log-file (utils/conj-path config-directory "messages.log")
+                     :backup-folder config-directory
                      :sample-size "16"
                      :audio-channels "2"
                      :host "127.0.0.1"

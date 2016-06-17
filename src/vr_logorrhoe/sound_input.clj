@@ -87,7 +87,7 @@
 
   (swap! config/app-state assoc :audio-samples-count 0)
 
-  (let [raw-file (.getChannel (java.io.FileOutputStream. "tmp.wav"))
+  (let [raw-file (.getChannel (java.io.FileOutputStream. (utils/conj-path (:backup-folder @config/settings) "tmp.wav")))
         audio-input-stream (new PipedInputStream)
         audio-output-stream (PipedOutputStream. audio-input-stream)]
 

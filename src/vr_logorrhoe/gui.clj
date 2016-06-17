@@ -50,7 +50,7 @@
                                       (choose-file :remember-directory? true
                                                    :selection-mode :dirs-only
                                                    :success-fn (fn [fc file]
-                                                                 (alert (str "Selected: " (.getAbsolutePath file))))))
+                                                                 (config/update-setting :backup-folder (.getAbsolutePath file)))))
                            :name "Choose Backup Folder"
                            :tip  "Choose Backup Folder"))
 
