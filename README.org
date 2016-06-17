@@ -215,8 +215,9 @@ The following script is based on [[http://centerkey.com/mac/java/][this]] tutori
 
 #+BEGIN_SRC sh
 cd target
-rm *iconset
+rm -rf *iconset
 rm -rf package deploy
+rm vr-restream.dmg
 mkdir vr-restream.iconset
 sips -z 128 128 ../resources/img/logo.png --out vr-restream.iconset/icon_128x128.png
 iconutil --convert icns vr-restream.iconset
@@ -229,9 +230,29 @@ $jdk/bin/javapackager -deploy -native dmg \
    -outdir deploy -outfile vr-restream -v
 #+END_SRC
 
+Note: If something needs to be packed into the .dmg file, this would
+be a way. In this example a config value is changed inside a file: For
+that, let's mount the .dmg file in RW mode, use sed to change the
+config file value and then create a new .dmg file that's again RO.
+This process has been inspired by:
+http://www.macenterprise.org/articles/creativewaysofusingshadowfiles
+
+#+BEGIN_SRC sh
+# Step 1: Eject the volume that has been mounted by javapackager
+hdiutil detach /Volumes/vr-restream
+# Step 2: Attach the read-only image with a shadow option
+hdiutil attach -owners on deploy/bundles/vr-restream-1.0.dmg -shadow
+# Step 3: Mutate inside the image what needs mutating
+sed -i '' -e "s/app.classpath=/app.classpath=vr_logorrhoe-0.1.0-SNAPSHOT-standalone.jar/g" /Volumes/vr-restream/vr-restream.app/Contents/Java/vr-restream.cfg
+# Step 4: Detach the currently attached image
+hdiutil detach /Volumes/vr-restream
+# Step 5: Convert the image back to read-only, in the process creating a new image
+hdiutil convert -format UDZO -o vr-restream.dmg deploy/bundles/vr-restream-1.0.dmg -shadow
+
+#+END_SRC
+
 After a good while (there's code signing going on), you will find a
 dmg file sitting in the deploy/bundles directory.
-
 
 ** License
 
