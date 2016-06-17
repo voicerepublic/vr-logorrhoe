@@ -8,7 +8,8 @@
             [vr-logorrhoe
              [config :as config]
              [sound-input :as sound-input]
-             [utils :as utils]]))
+             [utils :as utils]]
+            [vr-logorrhoe.shout :as shout]))
 
 ;; Declare initial state
 (swap! config/app-state assoc :record-button false)
@@ -90,8 +91,15 @@
                       :items [audio-sample-freq
                               audio-sample-size
                               audio-channels])
-        left-main (top-bottom-split audio-format
-                                    (scrollable audio-inputs))
+        server-field (text (shout/shout-config :host))
+        password-field (text (shout/shout-config :password))
+        mountpoint-field (text (shout/shout-config :mountpoint))
+        left-main (top-bottom-split
+                   (top-bottom-split audio-format
+                                     (horizontal-panel :items [server-field
+                                                               password-field
+                                                               mountpoint-field]))
+                   (scrollable audio-inputs))
 
         main (left-right-split left-main record-button :divider-location (/ 1 2.05))
         freq-col ["22050" "44100" "48000"]
@@ -120,6 +128,24 @@
                          :vgap 5 :hgap 5 :border 5))
 
     ;; Register actions
+    (listen server-field
+            :focus-lost
+            (fn [e]
+              (when-let [t (text server-field)]
+                (shout/set-host t))))
+
+    (listen password-field
+            :focus-lost
+            (fn [e]
+              (when-let [t (text password-field)]
+                (shout/set-password t))))
+
+    (listen mountpoint-field
+            :focus-lost
+            (fn [e]
+              (when-let [t (text mountpoint-field)]
+                (shout/set-mountpoint t))))
+
     (listen audio-inputs :selection (fn[e]
                                       (when-let [s (selection e)]
                                         (config/update-setting :recording-device s))))
@@ -135,7 +161,6 @@
     (listen audio-sample-size-combo-box :selection (fn[e]
                                                      (when-let [s (selection e)]
                                                        (config/update-setting :sample-size s))))
-
     (listen record-button
             :mouse-clicked
             (fn[e]
@@ -157,4 +182,4 @@
   (config! f :size [750 :by 500]))
 
 
-;; (start)
+    ;; (start)

@@ -4,18 +4,30 @@
     [config :as config]]
    [clj-http.client :as client]))
 
-(def shout-config (atom {:host "52.59.7.22"
-                         :port 80
-                         :password "vdzqlugn"
-                         :mount "e7117be6-3c09-42ae-8ce1-78dce2a6e347"}))
+(defn shout-config [param]
+  "Retrieves the specified parameter from the global configuration"
+  (param @config/settings))
 
 (defn- stream-endpoint []
-  (str "http://" (:host @shout-config) "/" (:mount @shout-config)))
+  (str "http://" (shout-config :host) "/" (shout-config :mountpoint)))
+
+(defn set-host [host]
+  (config/update-setting :host host))
+
+(defn set-password [host]
+  (config/update-setting :password host))
+
+(defn set-mountpoint [host]
+  (config/update-setting :mountpoint host))
+
+;; TODO: Actually use the port
+(defn set-port [host]
+  (config/update-setting :port host))
 
 (defn stream [input-stream]
   (client/put (stream-endpoint)
               {
-               :basic-auth ["source" (:password @shout-config)]
+               :basic-auth ["source" (shout-config :password)]
                :multipart [{:name "/foo"
                             :content input-stream
                             :length -1}]
