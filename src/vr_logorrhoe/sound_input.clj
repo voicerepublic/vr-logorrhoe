@@ -5,10 +5,9 @@
   (:require [clojure.java.io :as io]
             [vr-logorrhoe
              [config :as config]
-             [logger :refer [log]]
              [encoder :refer [encode]]
              [shout :as shout]
-             [utils :as utils]])
+             [utils :as utils :refer [log]]])
   (:import [java.io PipedInputStream PipedOutputStream]
            java.lang.Thread
            java.nio.ByteBuffer

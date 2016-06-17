@@ -1,7 +1,6 @@
 (ns vr-logorrhoe.config
   (:require [vr-logorrhoe
-             [logger :refer [log]]
-             [utils :as utils]]))
+             [utils :as utils :refer [log]]]))
 
 ;; TODO: This yields "/tmp" on the first run, when called a second
 ;; time it yields the correct value. Strange stuff.  Just doing it
@@ -19,6 +18,7 @@
 
 (def default-config {:recording-device ""
                      :sample-freq "44100"
+                     :log-file (utils/conj-path config-directory "messages.log")
                      :sample-size "16"
                      :audio-channels "2"
                      :host "127.0.0.1"
@@ -45,6 +45,9 @@
 
 ;; `app-state` are ephemeral settings that should not be persisted
 (def app-state (atom {}))
+
+;; Initially set the logger path
+(utils/set-logger-path (:log-file @settings))
 
 ;; Whenever the settings of the application changes, save this new
 ;; configuration to the disk

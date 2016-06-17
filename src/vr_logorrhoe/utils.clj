@@ -1,7 +1,18 @@
 (ns vr-logorrhoe.utils
-  (:require [clojure.java.io :as io]
-            [vr-logorrhoe.logger :refer [log]])
+  (:require [clojure.java.io :as io])
   (:import [java.io BufferedReader InputStreamReader]))
+
+(def util-app-state (atom { :logger-path "messages.log" }))
+
+(defn set-logger-path [path]
+  "Takes a path to where the log files should reside"
+  (swap! util-app-state assoc :logger-path path))
+
+(defn log [& msg]
+  "Prints a message to stdout, also writes to a log file"
+  (let [log-msg (apply str msg)]
+    (prn log-msg)
+    (spit (:logger-path @util-app-state) (str log-msg "\n") :append true)))
 
 (defn get-declared-methods [obj]
   "Get declared methods on `obj` through Java Reflection"

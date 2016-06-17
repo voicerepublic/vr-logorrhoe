@@ -2,7 +2,7 @@
   (:require
    [vr-logorrhoe
     [config :as config]
-    [logger :refer [log]]]
+    [utils :refer [log]]]
     [clojure.java.shell2 :refer [sh]]))
 
 (defn- lame-freq []

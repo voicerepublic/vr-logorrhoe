@@ -10,7 +10,7 @@
              [config :as config]
              [shout :as shout]
              [sound-input :as sound-input]
-             [utils :as utils]]))
+             [utils :as utils :refer [log]]]))
 
 ;; Declare initial state
 (swap! config/app-state assoc :record-button false)
