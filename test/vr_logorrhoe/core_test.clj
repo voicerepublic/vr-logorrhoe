@@ -1,9 +1,9 @@
 ;; Freedom patch
 (in-ns 'vr-logorrhoe.config)
-(def user-home "/tmp")
-(def config-directory (utils/conj-path user-home
+(def user-home-path "/tmp")
+(def app-directory (utils/conj-path user-home-path
                                          (str "." app-name)))
-(def config-file (utils/conj-path config-directory
+(def config-file-path (utils/conj-path app-directory
                                   "settings.edn"))
 
 
@@ -15,7 +15,7 @@
 
 (defn- remove-fs-fixtures []
   (utils/delete-folder "/tmp/spectest")
-  (utils/delete-folder config/config-directory true))
+  (utils/delete-folder config/app-directory true))
 
 (defn test-fixtures [f]
   (remove-fs-fixtures)
@@ -56,12 +56,12 @@
 
 (deftest initial-configuration-setup
   (testing "Sets up a config dir if not yet existing"
-    (is (= (utils/folder-exists? config/user-home)
+    (is (= (utils/folder-exists? config/user-home-path)
            true))
-    (is (= (utils/folder-exists? config/config-directory)
+    (is (= (utils/folder-exists? config/app-directory)
            false))
 
     (@#'config/write-default-config-file)
 
-    (is (= (utils/folder-exists? config/config-directory)
+    (is (= (utils/folder-exists? config/app-directory)
            true))))

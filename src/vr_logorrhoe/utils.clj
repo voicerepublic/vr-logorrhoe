@@ -72,3 +72,16 @@
 (defn parse-int [s]
   "Casts a String into an Int"
   (. Integer (parseInt s)))
+
+(defn copy-file [source-path dest-path]
+  "Copies a file from `source-path` to `dest-path`"
+  (io/copy (io/file source-path) (io/file dest-path)))
+
+(defn copy-file-from-resource [resource-path dest-path]
+  "Copies a file from the `resources` folder within a jar file. This
+  also works for binary files. This isn't possible using the regular
+  tools, because within the jar `clojure.java.io/resource` is
+  returning a URL which cannot be consumed by `java.io.File`. `spit`
+  and `slurp` would work, but they do not work on binary files."
+  (let [src (ClassLoader/getSystemResourceAsStream resource-path)]
+    (io/copy src (java.io.File. dest-path))))

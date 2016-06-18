@@ -23,7 +23,7 @@
   "Encodes an input-stream using `lame` and pipes the result into the
   `callback` function"
   ;; TODO: Needs a way to find the path to lame, even when bundled in resources/bin/
-  (sh "lame" "-r" "--cbr" "-b" "256" "-s" (lame-freq) "--bitwidth" (:sample-size @config/settings) "--signed" "--little-endian" "-m" (lame-mode) "-" "-"
+  (sh (config/encoder-path) "-r" "--cbr" "-b" "256" "-s" (lame-freq) "--bitwidth" (:sample-size @config/settings) "--signed" "--little-endian" "-m" (lame-mode) "-" "-"
       :in input
       :err #(do (log "lame has written to stderr!")
                 ;; TODO: `print-input-stream` doesn't print anything

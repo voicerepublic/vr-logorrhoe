@@ -256,4 +256,11 @@ dmg file sitting in the deploy/bundles directory.
 
 ** License
 
-   Copyright © 2016 Voice Republic Media AG
+    Copyright © 2016 Voice Republic Media AG
+
+*** Bundled software
+
+    This project bundles the [[http://lame.sourceforge.net/][LAME Encoder]]. LAME is under the
+    LGPL. Since it has been bundled in binary form and has not been
+    modified, it is allowed to distribute it within this project
+    without releasing the source of the project itself.
