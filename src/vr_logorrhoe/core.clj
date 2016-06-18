@@ -12,12 +12,22 @@
     (case (System/getProperty "os.name")
       "Mac OS X"
       (do
+        (utils/create-folder (utils/conj-path config/app-directory "bin"))
         (utils/copy-file-from-resource "bin/lame" (config/encoder-path))
         (clojure.java.shell/sh "chmod" "+x" (config/encoder-path))))))
 
+(defn- setup-assets []
+  "Copies the image assets if not yet available"
+  (if-not (utils/path-exists? config/assets-path)
+    (do
+      (utils/create-folder config/assets-path)
+      (utils/copy-file-from-resource "assets/logo.png" (utils/conj-path config/assets-path "logo.png")))))
+
 (defn- bootstrap []
   "Initial setup: encoder, assets"
-  (setup-encoder-binary))
+  (setup-encoder-binary)
+  (setup-assets))
 
 (defn -main [& args]
+  (bootstrap)
   (gui/start))

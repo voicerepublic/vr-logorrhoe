@@ -19,9 +19,11 @@
 (defn encoder-path []
   (case (System/getProperty "os.name")
     "Mac OS X"
-    (utils/conj-path app-directory "lame")
+    (utils/conj-path app-directory "bin/lame")
     "Linux"
     "lame"))
+
+(def assets-path (utils/conj-path app-directory "assets"))
 
 (def default-config {:recording-device ""
                      :sample-freq "44100"

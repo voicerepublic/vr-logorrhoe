@@ -219,7 +219,7 @@ rm -rf *iconset
 rm -rf package deploy
 rm vr-restream.dmg
 mkdir vr-restream.iconset
-sips -z 128 128 ../resources/img/logo.png --out vr-restream.iconset/icon_128x128.png
+sips -z 128 128 ../resources/assets/logo.png --out vr-restream.iconset/icon_128x128.png
 iconutil --convert icns vr-restream.iconset
 mkdir -p package/macosx
 cp vr-restream.icns package/macosx

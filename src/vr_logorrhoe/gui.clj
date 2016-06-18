@@ -15,7 +15,7 @@
 ;; Declare initial state
 (swap! config/app-state assoc :record-button false)
 
-(def icons {:logo (io/file "resources/img/logo.png")})
+(def icons {:logo (io/file (utils/conj-path config/assets-path "logo.png"))})
 
 ;; Before any UI is created, tell seesaw to make things look as native
 ;; as possible
@@ -184,3 +184,4 @@
 
 
 ;; (vr-logorrhoe.core/-main)
+;; (start)
