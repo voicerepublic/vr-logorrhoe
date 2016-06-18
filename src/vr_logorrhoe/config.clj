@@ -40,29 +40,11 @@
     (utils/create-folder app-directory))
   (spit config-file-path default-config))
 
-(defn- setup-encoder-binary []
-  "Install the encoder binary if not yet available"
-  (if-not (utils/path-exists? (encoder-path))
-    ;; potentially relevant for the future: os.version / os.arch
-    (case (System/getProperty "os.name")
-      "Mac OS X"
-      (do
-        (utils/copy-file-from-resource "bin/lame" (encoder-path))
-        (clojure.java.shell/sh "chmod" "+x" (encoder-path))))))
-
-(defn- setup-application
-  "Setup initial requirements: config folder/file, encoder"
-  []
-  ;; TODO: These should be two separate things. Maybe a `setup` ns is
-  ;; a good idea.
-  (write-default-config-file)
-  (setup-encoder-binary))
-
 ;; `settings` are permanent settings like a backup folder that will
 ;; also be persisted in the config file.
 (def settings (atom (if (utils/path-exists? config-file-path)
                       (read-string (slurp config-file-path))
-                      (do (setup-application)
+                      (do (write-default-config-file)
                           default-config))))
 
 (defn update-setting [key val]
