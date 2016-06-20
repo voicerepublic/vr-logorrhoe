@@ -24,8 +24,8 @@
 
         ;; default
         (do
-          (println "Error: No implementation for" os-name))
-          (System/exit 0)))))
+          (println "Error: No implementation for" os-name)
+          (System/exit 0))))))
 
 (defn- setup-assets []
   "Copies the image assets if not yet available"
