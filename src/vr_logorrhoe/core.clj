@@ -23,9 +23,7 @@
         ;;(utils/which "lame"))
 
         ;; default
-        (do
-          (println "Error: No implementation for" os-name)
-          (System/exit 0))))))
+        (utils/die "Error: No implementation for" os-name)))))
 
 (defn- setup-assets []
   "Copies the image assets if not yet available"

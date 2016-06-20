@@ -91,3 +91,7 @@
   (let [result (clojure.java.shell/sh "/usr/bin/which" name)
         path (:out result)]
     (clojure.string/replace path #"\n$" "")))
+
+(defn die [& args]
+  (apply println args)
+  (System/exit 1))
