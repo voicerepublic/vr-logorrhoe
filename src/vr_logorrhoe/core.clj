@@ -17,10 +17,8 @@
           (utils/copy-file-from-resource "bin/lame" (config/encoder-path))
           (clojure.java.shell/sh "chmod" "+x" (config/encoder-path)))
 
-        ;;"Linux"
-        ;;(do
-        ;;(utils/create-folder (utils/conj-path config/app-directory "bin"))
-        ;;(utils/which "lame"))
+        "Linux"
+        (utils/which "lame")
 
         ;; default
         (utils/die "Error: No implementation for" os-name)))))

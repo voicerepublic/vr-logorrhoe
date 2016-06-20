@@ -6,7 +6,8 @@
   :dependencies [[seesaw "1.4.5"]
                  [com.climate/java.shell2 "0.1.0"]
                  [clj-http "2.1.0"]
-                 [org.clojure/clojure "1.8.0"]]
+                 [org.clojure/clojure "1.8.0"]
+                 [org.clojure/tools.logging "0.3.1"]]
   :aot [vr-logorrhoe.core]
   :main vr-logorrhoe.core
   :repositories [["java.net" "http://download.java.net/maven/2"]
@@ -24,4 +25,5 @@
                               ;; snapshot updates? (:daily, :always, or :never)
                               :update :always
                               ;; You can also apply them to releases only:
-                              :releases {:checksum :fail :update :always}}]])
+                              :releases {:checksum :fail :update :always}}]]
+  :jvm-opts ["-Djava.util.logging.config.file=resources/app.properties"])
