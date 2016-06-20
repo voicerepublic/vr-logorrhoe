@@ -44,16 +44,29 @@
 
 ;; `settings` are permanent settings like a backup folder that will
 ;; also be persisted in the config file.
-(def settings (atom (if (utils/path-exists? config-file-path)
+(def ^{:private true} settings (atom (if (utils/path-exists? config-file-path)
                       (read-string (slurp config-file-path))
                       (do (write-default-config-file)
                           default-config))))
 
-(defn update-setting [key val]
-  (swap! settings assoc key val))
+(defn setting
+  "When given a key, return the value of the setting. When given a key
+  and value, update the setting"
+  ([key val]
+   (swap! settings assoc key val))
+  ([key]
+   (key @settings)))
 
 ;; `app-state` are ephemeral settings that should not be persisted
-(def app-state (atom {}))
+(def ^{:private true} app-state (atom {}))
+
+(defn state
+  "When given a key, return the value of the state. When given a key
+  and value, update the state"
+  ([key val]
+   (swap! app-state assoc key val))
+  ([key]
+   (key @app-state)))
 
 ;; Initially set the logger path
 (utils/set-logger-path (:log-file @settings))
