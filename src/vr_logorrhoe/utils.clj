@@ -1,7 +1,5 @@
 (ns vr-logorrhoe.utils
-  (:require [clojure.java
-             [io :as io]
-             [shell :as shell]])
+  (:require [clojure.java.io :as io])
   (:import [java.io BufferedReader InputStreamReader]))
 
 (def util-app-state (atom {}))
@@ -87,11 +85,6 @@
   and `slurp` would work, but they do not work on binary files."
   (let [src (ClassLoader/getSystemResourceAsStream resource-path)]
     (io/copy src (java.io.File. dest-path))))
-
-(defn which [name]
-  (let [result (shell/sh "/usr/bin/which" name)
-        path (:out result)]
-    (clojure.string/replace path #"\n$" "")))
 
 (defn die [& args]
   (apply println args)
