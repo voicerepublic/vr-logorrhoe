@@ -1,5 +1,7 @@
 (ns vr-logorrhoe.utils
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java
+             [io :as io]
+             [shell :as shell]])
   (:import [java.io BufferedReader InputStreamReader]))
 
 (def util-app-state (atom {}))
@@ -87,7 +89,7 @@
     (io/copy src (java.io.File. dest-path))))
 
 (defn which [name]
-  (let [result (clojure.java.shell/sh "/usr/bin/which" name)
+  (let [result (shell/sh "/usr/bin/which" name)
         path (:out result)]
     (clojure.string/replace path #"\n$" "")))
 

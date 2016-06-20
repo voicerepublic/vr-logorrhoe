@@ -1,17 +1,15 @@
-;; Freedom patch
-(in-ns 'vr-logorrhoe.config)
-
-(def app-directory (utils/conj-path user-home-path
-                                         (str "." app-name)))
-(def config-file-path (utils/conj-path app-directory
-                                  "settings.edn"))
-
-
 (ns vr-logorrhoe.core-test
   (:require [clojure.test :refer :all]
             [vr-logorrhoe
              [config :as config]
              [utils :as utils]]))
+
+;; Freedom patch
+(in-ns 'vr-logorrhoe.config)
+(def app-directory "/tmp/.vr-logorrhoe/")
+(def config-file-path "/tmp/.vr-logorrhoe/settings.edn")
+(in-ns 'vr-logorrhoe.core-test)
+;; End Freedom patch
 
 (defn- remove-fs-fixtures []
   (utils/delete-folder "/tmp/spectest")
