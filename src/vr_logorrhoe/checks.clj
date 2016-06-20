@@ -1,10 +1,13 @@
 (ns vr-logorrhoe.checks
   (:gen-class)
-  (:require [seesaw.core :as seesaw]
+  (:require [vr-logorrhoe.utils :as utils]
+            [seesaw.core :as seesaw]
             [clj-http.client :as client]))
 
 
 (def versions-endpoint "https://voicerepublic.com/versions.edn")
+
+;; ------------------------------ connectivity
 
 (def connectivity-warning
   (str "It seems your machine is not connected to the internet. "
@@ -23,10 +26,26 @@
   (while (not (connected?))
     (show-connectivity-warning)))
 
-;;(def client-name "desktop")
-;;
-;;(defn check-version []
-;;  (let [versions (-> (client/get versions-endpoint)
-;;                  :body
-;;                  clojure.edn/read-string)]
-;;    versions))
+;; ------------------------------ version
+
+(def client-name "desktop")
+
+; TODO read this from a file
+(def client-version 2)
+
+(def update-warning
+  (str "Your software is out of date. "
+       "Please download and install a recent version "
+       "from http://voicerepublic.com"))
+
+(defn- show-update-warning []
+  (seesaw/alert update-warning))
+
+(defn check-version []
+  (let [versions (-> (client/get versions-endpoint)
+                     :body
+                     clojure.edn/read-string)
+        current (get versions client-name 0)]
+    (when (< client-version current)
+      (show-update-warning)
+      (utils/die "Out of date."))))
