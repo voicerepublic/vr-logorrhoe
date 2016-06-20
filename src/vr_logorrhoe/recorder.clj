@@ -34,7 +34,7 @@
   (:mixer-info (first (filter #(= recorder-name (:name %)) (get-mixer-infos)))))
 
 (def recorder-mixer-info
-  (get-recorder-mixer-info (:recording-device @config/settings)))
+  (get-recorder-mixer-info (config/setting :recording-device)))
 
 ;; Get the recorder mixer
 (def recorder-mixer (. AudioSystem (getMixer recorder-mixer-info)))
@@ -42,9 +42,9 @@
 ;; Create a RAW data format. It can be played like this:
 ;;   aplay -t raw clojure.wav -c 1 -r 44100 -f S16_LE
 ;; -> float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian
-(def audio-format (new AudioFormat (utils/parse-int (:sample-freq @config/settings))
-                       (utils/parse-int (:sample-size @config/settings))
-                       (utils/parse-int (:audio-channels @config/settings))
+(def audio-format (new AudioFormat (utils/parse-int (config/setting :sample-freq))
+                       (utils/parse-int (config/setting :sample-size))
+                       (utils/parse-int (config/setting :audio-channels))
                        true false))
 
 ;; Get supported target line info
@@ -67,7 +67,7 @@
     (. recorder-line (addLineListener
                       (reify LineListener
                         (update [this evt]
-                          (do (print "Event: " (. evt (getType)))
+                          (do (log "Event: " (. evt (getType)))
                               (newline)
                               (. *out* (flush)))))))
 
@@ -85,21 +85,23 @@
 
   (log "Entering `record` function")
 
-  (swap! config/app-state assoc :audio-samples-count 0)
+  (config/state :audio-samples-count 0)
 
-  (let [raw-file (.getChannel (java.io.FileOutputStream. (utils/conj-path (:backup-folder @config/settings) "tmp.wav")))
+  (let [raw-file (.getChannel (java.io.FileOutputStream. (utils/conj-path (config/setting :backup-folder) "tmp.wav")))
         audio-input-stream (new PipedInputStream)
         audio-output-stream (PipedOutputStream. audio-input-stream)]
 
-    (while (:recording @config/app-state)
+    (while (config/state :recording)
       (let [mic-sample-buffer    (make-array (. Byte TYPE) mic-buffer-size)
-            ;; Only required for side-effect
             mic-sample-count (. recorder-line (read mic-sample-buffer 0 mic-buffer-size))
             ;; Current sample
             mic-sample-bbyte (. ByteBuffer (wrap mic-sample-buffer))]
 
-        (swap! config/app-state update :audio-samples-count inc)
+        (config/state :audio-samples-count inc)
 
+        ;; NOTE: Maybe refactor mic-sample-buffer
+        ;; vs. mic-sample-bbyte. The second one might not be needed
+        ;; anymore.
         (future
           (.write audio-output-stream mic-sample-buffer 0 mic-sample-count))
 
@@ -109,7 +111,8 @@
         ;; Give the audio buffer a little heads-up before starting to
         ;; encode and stream. Otherwise the buffer will be depleted
         ;; quickly and the encoding/streaming process will terminate!
-        (if (= (:audio-samples-count @config/app-state) 9)
+        ;; TODO: Use 5s delay instead of only 9 samples
+        (if (= (config/state :audio-samples-count) 9)
           (future
             (log "Start encoding!")
             ;; TODO: Duplicate input-stream so that it can be shouted
@@ -144,7 +147,7 @@
           ;; This needs to be called before the line is open.
           mic-buffer-size (int (/ (.getBufferSize recorder-line) 5))]
 
-      (swap! config/app-state assoc :recording true)
+      (config/state :recording true)
 
       ;; Open the Port
       (. recorder-line (open audio-format mic-buffer-size))
@@ -159,7 +162,7 @@
   recording."
 
   (log "stop-recording")
-  (swap! config/app-state assoc :recording false))
+  (config/state :recording false))
 
 
 
