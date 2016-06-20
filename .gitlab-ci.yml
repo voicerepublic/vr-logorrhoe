@@ -3,7 +3,7 @@ variables:
 
 before_script:
   - apt-get update -y
-  - apt-get install default-jre -y
+  - apt-get install xvfb default-jre -y
   - wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
   - chmod a+x lein
   - export LEIN_ROOT=1
@@ -12,4 +12,5 @@ before_script:
 
 test:
   script:
-    - lein test
+    # - Xvfb :1 -screen 0 1024x768x24+32
+    - xvfb-run lein test
