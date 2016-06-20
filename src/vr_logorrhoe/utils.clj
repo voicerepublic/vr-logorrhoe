@@ -86,3 +86,8 @@
   and `slurp` would work, but they do not work on binary files."
   (let [src (ClassLoader/getSystemResourceAsStream resource-path)]
     (io/copy src (java.io.File. dest-path))))
+
+(defn which [name]
+  (let [result (clojure.java.shell/sh "/usr/bin/which" name)
+        path (:out result)]
+    (clojure.string/replace path #"\n$" "")))
