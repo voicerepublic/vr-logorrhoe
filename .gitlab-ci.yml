@@ -2,6 +2,7 @@ variables:
   PLACEHOLDER: "placeholder"
 
 before_script:
+  - "true"
   # - apt-get update -y
   # - apt-get install default-jre -y
   # - wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
@@ -12,4 +13,5 @@ before_script:
 
 test:
   script:
+    - "true"
     # - lein test
