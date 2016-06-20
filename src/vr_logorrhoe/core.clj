@@ -9,12 +9,23 @@
   "Install the encoder binary if not yet available"
   (if-not (utils/path-exists? (config/encoder-path))
     ;; potentially relevant for the future: os.version / os.arch
-    (case (System/getProperty "os.name")
-      "Mac OS X"
-      (do
-        (utils/create-folder (utils/conj-path config/app-directory "bin"))
-        (utils/copy-file-from-resource "bin/lame" (config/encoder-path))
-        (clojure.java.shell/sh "chmod" "+x" (config/encoder-path))))))
+    (let [os-name (System/getProperty "os.name")]
+      (case os-name
+        "Mac OS X"
+        (do
+          (utils/create-folder (utils/conj-path config/app-directory "bin"))
+          (utils/copy-file-from-resource "bin/lame" (config/encoder-path))
+          (clojure.java.shell/sh "chmod" "+x" (config/encoder-path)))
+
+        ;;"Linux"
+        ;;(do
+        ;;(utils/create-folder (utils/conj-path config/app-directory "bin"))
+        ;;(utils/which "lame"))
+
+        ;; default
+        (do
+          (println "Error: No implementation for" os-name))
+          (System/exit 0)))))
 
 (defn- setup-assets []
   "Copies the image assets if not yet available"
