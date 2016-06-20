@@ -9,7 +9,7 @@
             [vr-logorrhoe
              [config :as config]
              [shout :as shout]
-             [sound-input :as sound-input]
+             [recorder :as recorder]
              [utils :as utils :refer [log]]]))
 
 ;; Declare initial state
@@ -75,7 +75,7 @@
                            :style #{:bold}
                            :size 34))
         record-button (button :text "Record")
-        audio-inputs (listbox :model (sound-input/get-mixer-names))
+        audio-inputs (listbox :model (recorder/get-mixer-names))
         ;; TODO: Add the other audio-format configuration parameters
         ;; -> int channels, boolean signed, boolean bigEndian
         audio-sample-freq-combo-box (create-combo-box)
@@ -175,8 +175,8 @@
 
               (future
                 (if (:record-button @config/app-state)
-                  (sound-input/start-recording)
-                  (sound-input/stop-recording))))))
+                  (recorder/start-recording)
+                  (recorder/stop-recording))))))
 
   ;; Set size after everything else is in the frame, otherwise the
   ;; size in Windows will be set to 0x0 anyway.

@@ -1,7 +1,7 @@
 ;; Well written tutorial on the Java Sampled Package:
 ;; http://docs.oracle.com/javase/tutorial/sound/sampled-overview.html
 
-(ns vr-logorrhoe.sound-input
+(ns vr-logorrhoe.recorder
   (:require [clojure.java.io :as io]
             [vr-logorrhoe
              [config :as config]
