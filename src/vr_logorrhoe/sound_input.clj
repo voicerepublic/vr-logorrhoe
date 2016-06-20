@@ -50,35 +50,35 @@
 ;; Get supported target line info
 (def target-line-info (new DataLine$Info TargetDataLine audio-format))
 
-;; Get a target line from the mixer
-(def recorder-line (try
-                     (. recorder-mixer
-                        (getLine target-line-info))
-                     (catch Exception e
-                       (println "Exception with getting the line for mixer: " e)
-                       false)))
+(defn- get-recorder-line []
+  "Sets up a recorder line from the mixer and attaches event
+  listeners"
 
-;; Add a line listener for events on the line. This is an optional step
-;; and is currently only used for logging purposes.
-(. recorder-line (addLineListener
-                  (reify LineListener
-                    (update [this evt]
-                      (do (print "Event: " (. evt (getType)))
-                          (newline)
-                          (. *out* (flush)))))))
+  ;; Get a target line from the ixer
+  (let [recorder-line (try
+                        (. recorder-mixer
+                           (getLine target-line-info))
+                        (catch Exception e
+                          (log "Exception with getting the line for mixer: " e)
+                          false))]
 
-;; The size of the buffer is deliberately 1/5th of the lines
-;; buffer. Otherwise there's a racing condition between the mixer
-;; writing to and this code reading from the buffer.
-;; This needs to be called before the line is open.
-(def mic-buffer-size (int (/ (.getBufferSize recorder-line) 5)))
+    ;; Add a line listener for events on the line. This is an optional step
+    ;; and is currently only used for logging purposes.
+    (. recorder-line (addLineListener
+                      (reify LineListener
+                        (update [this evt]
+                          (do (print "Event: " (. evt (getType)))
+                              (newline)
+                              (. *out* (flush)))))))
+
+    recorder-line))
 
 (defn- write-buffer-to-file [buffer file]
   "Takes a ByteBuffer and writes it into a FileChannel"
   (future
     (.write file buffer)))
 
-(defn- record []
+(defn- record [recorder-line mic-buffer-size]
   "Starts collecting audio samples from it, encodes it with `lame`,
   writes a raw and a mp3 file and streams the mp3 audio samples via
   HTTP PUT."
@@ -137,15 +137,22 @@
   (log "start-recording")
 
   (future
-    (swap! config/app-state assoc :recording true)
+    (let [recorder-line (get-recorder-line)
+          ;; The size of the buffer is deliberately 1/5th of the lines
+          ;; buffer. Otherwise there's a racing condition between the mixer
+          ;; writing to and this code reading from the buffer.
+          ;; This needs to be called before the line is open.
+          mic-buffer-size (int (/ (.getBufferSize recorder-line) 5))]
 
-    ;; Open the Port
-    (. recorder-line (open audio-format mic-buffer-size))
+      (swap! config/app-state assoc :recording true)
 
-    ;; Start Audio Capture
-    (. recorder-line (start))
+      ;; Open the Port
+      (. recorder-line (open audio-format mic-buffer-size))
 
-    (record)))
+      ;; Start Audio Capture
+      (. recorder-line (start))
+
+      (record recorder-line mic-buffer-size))))
 
 (defn stop-recording []
   "Sets a magic-var so that the `record` function knows to end the
