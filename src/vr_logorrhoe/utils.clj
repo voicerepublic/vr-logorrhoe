@@ -6,7 +6,8 @@
 
 (defn set-logger-path [path]
   "Takes a path to where the log files should reside"
-  (swap! util-app-state assoc :logger-path path))
+  (if path
+    (swap! util-app-state assoc :logger-path path)))
 
 (defn log [& msg]
   "Prints a message to stdout, also writes to a log file"
