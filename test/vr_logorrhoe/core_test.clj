@@ -1,6 +1,6 @@
 ;; Freedom patch
 (in-ns 'vr-logorrhoe.config)
-(def user-home-path "/tmp")
+
 (def app-directory (utils/conj-path user-home-path
                                          (str "." app-name)))
 (def config-file-path (utils/conj-path app-directory
@@ -19,10 +19,12 @@
 
 (defn test-fixtures [f]
   (remove-fs-fixtures)
+  (utils/set-logger-path "/tmp/messages_spec.log")
   (f)
   (remove-fs-fixtures))
 
 (use-fixtures :once test-fixtures)
+
 
 (deftest stream-helpers
   (testing "print an input-stream does not throw an exception"
