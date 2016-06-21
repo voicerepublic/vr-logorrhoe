@@ -23,7 +23,7 @@
         ;; good place to make sure those dependencies got installed.
         "Linux"
         (if (nil? (re-seq #"lame" (.toLowerCase (:err (sh "lame")))))
-          (utils/die "Error: No lame installed!"))
+          (utils/die "Error: Could no find `lame` in PATH."))
 
         ;; default
         true))))
