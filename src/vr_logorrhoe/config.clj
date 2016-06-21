@@ -33,7 +33,8 @@
                      :audio-channels "2"
                      :host "127.0.0.1"
                      :password "thisisnotagoodpassword"
-                     :mountpoint "i_am_a_mountpoint"})
+                     :mountpoint "i_am_a_mountpoint"
+                     :identifier (utils/generate-identifier)})
 
 (defn- write-default-config-file []
   "Check whether there's a *re-stream* config folder and config
@@ -48,6 +49,12 @@
                       (read-string (slurp config-file-path))
                       (do (write-default-config-file)
                           default-config))))
+
+(defn merge-state!
+  "Merges the given map into the existing app-state, overwriting
+  any existing values."
+  [new-state]
+  (swap! app-state merge new-state))
 
 (defn setting
   "When given a key, return the value of the setting. When given a key

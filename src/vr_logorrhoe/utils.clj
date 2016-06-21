@@ -89,3 +89,16 @@
 (defn die [& args]
   (apply println args)
   (System/exit 1))
+
+
+(defn- generate-uuid []
+  (str (java.util.UUID/randomUUID)))
+
+(defn- user-name []
+  (or (System/getProperty "user.name") "noname"))
+
+(defn- host-name []
+  (or (.. java.net.InetAddress getLocalHost getHostName) "unknown"))
+
+(defn generate-identifier []
+  (str (user-name) "@" (host-name) ":" (generate-uuid)))

@@ -1,48 +1,51 @@
 (ns vr-logorrhoe.vrapi
-  (:require [clj-http.client :as client]
+  (:require [vr-logorrhoe
+             [config :as config :refer [setting state merge-state!]]]
+            [taoensso.timbre :as timbre :refer [debug]]
+            [clj-http.client :as client]
             [cheshire.core :as json]))
 
+;; ------------------------------ knocking (rest)
 
-;; TODO move to utils
-(defn uuid []
-  (str (java.util.UUID/randomUUID)))
+;; this can easily be hardcoded, since it will NEVER change
+(def ^{:private true} default-endpoint
+  "https://voicerepublic.com/api/devices")
 
-;; TODO needs to come from settings
-(def identifier (uuid))
-
-;; ------------------------------ knocking
-
-(def default-endpoint
-  ;;"https://voicerepublic.com/api/devices")
-  "http://localhost:3000/api/devices")
+(def ^{:private true} loglevel-mapping
+  [:debug :info :warn :error :fatal :report])
 
 (defn knock []
-  (let [data (-> (str default-endpoint "/" identifier)
+  (let [data (-> (str default-endpoint "/" (setting :identifier))
                  (client/get {:accept :json})
                  :body
-                 (json/parse-string true))]
-    ;; TOOD needs to be stored in settings
-    (prn data)))
+                 (json/parse-string true))
+        log-level (get loglevel-mapping (:loglevel data))]
+    (debug "knock returned" data)
+    (state :endpoint (:endpoint data))
+    (state :log-level log-level)
+    (timbre/set-level! log-level)))
 
-;; ------------------------------ registering
+;; ------------------------------ registering (rest)
 
 (defn- register-payload []
   {:device
-   {:identifier identifier
+   {:identifier (setting :identifier)
     :type "vr-restream" ;; TODO use a name also used elsewhere
     :subtype "0"}}) ;; TODO use a version/buildnumber also used elsewhere
 
 (defn- register-options []
   {:form-params (register-payload)
    :content-type :json
-   :accept :json
-   :debug true
-   :throw-entire-message? true})
+   :accept :json})
+
+(defn- keywordize
+  "Turns an underscored string into a dasherized keyword."
+  [string]
+  (keyword (clojure.string/replace string #"_" "-")))
 
 (defn register []
-  ;; TODO use enpoint from settings instead of default-endpoint
-  (let [data (-> (client/post default-endpoint (register-options))
+  (let [data (-> (client/post (state :endpoint) (register-options))
                  :body
-                 (json/parse-string true))]
-    ;; TODO needs to be stored in settings
-    (prn data)))
+                 (json/parse-string keywordize))]
+    (debug "register returned" data)
+    (merge-state! data)))
