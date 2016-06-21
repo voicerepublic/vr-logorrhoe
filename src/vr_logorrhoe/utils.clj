@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io])
   (:import [java.io BufferedReader InputStreamReader]))
 
-(def util-app-state (atom { :logger-path "messages.log" }))
+(def util-app-state (atom {}))
 
 (defn set-logger-path [path]
   "Takes a path to where the log files should reside"
@@ -85,3 +85,7 @@
   and `slurp` would work, but they do not work on binary files."
   (let [src (ClassLoader/getSystemResourceAsStream resource-path)]
     (io/copy src (java.io.File. dest-path))))
+
+(defn die [& args]
+  (apply println args)
+  (System/exit 1))
