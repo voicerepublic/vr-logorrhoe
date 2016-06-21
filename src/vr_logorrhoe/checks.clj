@@ -1,5 +1,4 @@
 (ns vr-logorrhoe.checks
-  (:gen-class)
   (:require [seesaw.core :as seesaw]
             [clj-http.client :as client]))
 
