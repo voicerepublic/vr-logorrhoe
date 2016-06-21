@@ -46,6 +46,6 @@
 (defn -main [& args]
   (logging/setup!)
   (checks/check-connectivity)
-  ;;(checks/check-version)
+  (checks/check-version)
   (bootstrap)
   (gui/start))
