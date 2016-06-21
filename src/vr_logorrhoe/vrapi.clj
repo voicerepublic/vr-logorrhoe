@@ -6,6 +6,7 @@
 (defn uuid []
   (str (java.util.UUID/randomUUID)))
 
+;; TODO needs to come from settings
 (def identifier (uuid))
 
 (def default-endpoint
@@ -16,4 +17,5 @@
                  client/get
                  :body
                  (json/read-str :key-fn keyword))]
+    ;; TOOD needs to be stored in settings
     (prn data)))
