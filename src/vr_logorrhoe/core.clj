@@ -1,10 +1,12 @@
 (ns vr-logorrhoe.core
   (:gen-class)
   (:require [vr-logorrhoe
+             [checks :as checks]
              [gui :as gui]
              [config :as config]
              [utils :as utils]]
             [clojure.java.shell :refer [sh]]))
+
 
 (defn- setup-encoder-binary []
   "Install the encoder binary if not yet available"
@@ -41,5 +43,7 @@
   (setup-assets))
 
 (defn -main [& args]
+  (checks/check-connectivity)
+  ;;(checks/check-version)
   (bootstrap)
   (gui/start))
