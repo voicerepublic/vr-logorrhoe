@@ -27,6 +27,3 @@ pom.xml.asc
 ._*
 .Trashes
 Thumbs.db
-
-/app.log
-/messages.log
