@@ -50,12 +50,6 @@
                       (do (write-default-config-file)
                           default-config))))
 
-(defn merge-state!
-  "Merges the given map into the existing app-state, overwriting
-  any existing values."
-  [new-state]
-  (swap! app-state merge new-state))
-
 (defn setting
   "When given a key, return the value of the setting. When given a key
   and value, update the setting"
@@ -74,6 +68,12 @@
    (swap! app-state assoc key val))
   ([key]
    (key @app-state)))
+
+(defn merge-state!
+  "Merges the given map into the existing app-state, overwriting
+  any existing values."
+  [new-state]
+  (swap! app-state merge new-state))
 
 ;; Initially set the logger path
 (utils/set-logger-path (:log-file @settings))
