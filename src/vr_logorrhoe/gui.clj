@@ -9,11 +9,11 @@
             [vr-logorrhoe
              [config :as config]
              [shout :as shout]
-             [sound-input :as sound-input]
+             [recorder :as recorder]
              [utils :as utils :refer [log]]]))
 
 ;; Declare initial state
-(swap! config/app-state assoc :record-button false)
+(config/state :record-button false)
 
 (def icons {:logo (io/file (utils/conj-path config/assets-path "logo.png"))})
 
@@ -50,7 +50,7 @@
                                       (choose-file :remember-directory? true
                                                    :selection-mode :dirs-only
                                                    :success-fn (fn [fc file]
-                                                                 (config/update-setting :backup-folder (.getAbsolutePath file)))))
+                                                                 (config/setting :backup-folder (.getAbsolutePath file)))))
                            :name "Choose Backup Folder"
                            :tip  "Choose Backup Folder"))
 
@@ -75,7 +75,7 @@
                            :style #{:bold}
                            :size 34))
         record-button (button :text "Record")
-        audio-inputs (listbox :model (sound-input/get-mixer-names))
+        audio-inputs (listbox :model (recorder/get-mixer-names))
         ;; TODO: Add the other audio-format configuration parameters
         ;; -> int channels, boolean signed, boolean bigEndian
         audio-sample-freq-combo-box (create-combo-box)
@@ -92,9 +92,9 @@
                       :items [audio-sample-freq
                               audio-sample-size
                               audio-channels])
-        server-field (text (shout/shout-config :host))
-        password-field (text (shout/shout-config :password))
-        mountpoint-field (text (shout/shout-config :mountpoint))
+        server-field (text (config/setting :host))
+        password-field (text (config/setting :password))
+        mountpoint-field (text (config/setting :mountpoint))
         left-main (top-bottom-split
                    (top-bottom-split audio-format
                                      (horizontal-panel :items [server-field
@@ -107,19 +107,19 @@
         channels-col ["1" "2"]
         sample-size-col ["16" "24" "32"]]
 
-    (selection! audio-inputs (:recording-device @config/settings))
+    (selection! audio-inputs (config/setting :recording-device))
 
     (populate-combo-box audio-channels-combo-box
                         channels-col
-                        (utils/index-of (:audio-channels @config/settings) channels-col))
+                        (utils/index-of (config/setting :audio-channels) channels-col))
 
     (populate-combo-box audio-sample-freq-combo-box
                         freq-col
-                        (utils/index-of (:sample-freq @config/settings) freq-col))
+                        (utils/index-of (config/setting :sample-freq) freq-col))
 
     (populate-combo-box audio-sample-size-combo-box
                         sample-size-col
-                        (utils/index-of (:sample-size @config/settings) sample-size-col))
+                        (utils/index-of (config/setting :sample-size) sample-size-col))
 
     ;; Set up the GUI layout
     (config! f :content (border-panel
@@ -149,34 +149,34 @@
 
     (listen audio-inputs :selection (fn[e]
                                       (when-let [s (selection e)]
-                                        (config/update-setting :recording-device s))))
+                                        (config/setting :recording-device s))))
 
     (listen audio-channels-combo-box :selection (fn[e]
                                         (when-let [s (selection e)]
-                                          (config/update-setting :audio-channels s))))
+                                          (config/setting :audio-channels s))))
 
     (listen audio-sample-freq-combo-box :selection (fn[e]
                                                      (when-let [s (selection e)]
-                                                       (config/update-setting :sample-freq s))))
+                                                       (config/setting :sample-freq s))))
 
     (listen audio-sample-size-combo-box :selection (fn[e]
                                                      (when-let [s (selection e)]
-                                                       (config/update-setting :sample-size s))))
+                                                       (config/setting :sample-size s))))
     (listen record-button
             :mouse-clicked
             (fn[e]
 
-              (swap! config/app-state update :record-button not)
+              (config/state :record-button not)
 
               (config! record-button
-                       :text (if (:record-button @config/app-state)
+                       :text (if (config/state :record-button)
                                "Stop"
                                "Record"))
 
               (future
-                (if (:record-button @config/app-state)
-                  (sound-input/start-recording)
-                  (sound-input/stop-recording))))))
+                (if (config/state :record-button)
+                  (recorder/start-recording)
+                  (recorder/stop-recording))))))
 
   ;; Set size after everything else is in the frame, otherwise the
   ;; size in Windows will be set to 0x0 anyway.

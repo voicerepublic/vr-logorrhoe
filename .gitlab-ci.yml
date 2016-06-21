@@ -2,16 +2,18 @@ variables:
   PLACEHOLDER: "placeholder"
 
 before_script:
-  - "true"
-  # - apt-get update -y
-  # - apt-get install default-jre -y
-  # - wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
-  # - chmod a+x lein
-  # - export LEIN_ROOT=1
-  # - PATH=$PATH:.
-  # - lein deps
+  - apt-get update -y
+  - apt-get install xvfb default-jre -y
+  - wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
+  - chmod a+x lein
+  - export LEIN_ROOT=1
+  - PATH=$PATH:.
+  - lein deps
 
 test:
   script:
-    - "true"
-    # - lein test
+    # This might be a big overkill, but we're running the tests within
+    # an x-server. The reason being that on CI the app will start and
+    # the `core` ns gets precompiled which triggers an exception,
+    # because there's no X for Swing.
+    - xvfb-run lein test
