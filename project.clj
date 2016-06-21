@@ -6,6 +6,9 @@
   :dependencies [[seesaw "1.4.5"]
                  [com.climate/java.shell2 "0.1.0"]
                  [clj-http "2.1.0"]
+                 ;; https://mvnrepository.com/artifact/org.cometd.java/cometd-java-client
+                 [org.cometd.java/cometd-java-client "3.0.9"]
+                 [cheshire "5.6.2"]
                  [org.clojure/clojure "1.8.0"]]
   :aot [vr-logorrhoe.core]
   :main vr-logorrhoe.core
