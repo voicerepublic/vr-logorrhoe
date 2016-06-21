@@ -16,7 +16,6 @@
   (let [log-msg (apply str msg)
         path  (:logger-path @util-app-state)]
     (logt/info log-msg)
-    (println log-msg)
     (spit path (str log-msg "\n") :append true)))
 
 (defn get-declared-methods [obj]
