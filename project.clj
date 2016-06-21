@@ -25,5 +25,4 @@
                               ;; snapshot updates? (:daily, :always, or :never)
                               :update :always
                               ;; You can also apply them to releases only:
-                              :releases {:checksum :fail :update :always}}]]
-  :jvm-opts ["-Djava.util.logging.config.file=resources/app.properties"])
+                              :releases {:checksum :fail :update :always}}]])

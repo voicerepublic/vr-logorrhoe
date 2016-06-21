@@ -1,6 +1,7 @@
 (ns vr-logorrhoe.core
   (:gen-class)
   (:require [vr-logorrhoe
+             [logging :as logging]
              [checks :as checks]
              [gui :as gui]
              [config :as config]
@@ -43,6 +44,7 @@
   (setup-assets))
 
 (defn -main [& args]
+  (logging/setup!)
   (checks/check-connectivity)
   ;;(checks/check-version)
   (bootstrap)
