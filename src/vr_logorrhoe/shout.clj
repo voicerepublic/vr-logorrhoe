@@ -4,30 +4,26 @@
     [config :as config]]
    [clj-http.client :as client]))
 
-(defn shout-config [param]
-  "Retrieves the specified parameter from the global configuration"
-  (param @config/settings))
-
 (defn- stream-endpoint []
-  (str "http://" (shout-config :host) "/" (shout-config :mountpoint)))
+  (str "http://" (config/setting :host) "/" (config/setting :mountpoint)))
 
 (defn set-host [host]
-  (config/update-setting :host host))
+  (config/setting :host host))
 
 (defn set-password [host]
-  (config/update-setting :password host))
+  (config/setting :password host))
 
 (defn set-mountpoint [host]
-  (config/update-setting :mountpoint host))
+  (config/setting :mountpoint host))
 
 ;; TODO: Actually use the port
 (defn set-port [host]
-  (config/update-setting :port host))
+  (config/setting :port host))
 
 (defn stream [input-stream]
   (client/put (stream-endpoint)
               {
-               :basic-auth ["source" (shout-config :password)]
+               :basic-auth ["source" (config/setting :password)]
                :multipart [{:name "/foo"
                             :content input-stream
                             :length -1}]
@@ -35,9 +31,9 @@
                          :ice-bitrate "256"
                          :content-type "audio/mpeg"
                          :ice-audio-info (str "ice-samplerate="
-                                              (:sample-freq @config/settings)
+                                              (config/setting :sample-freq)
                                               ";ice-bitrate=256;ice-channels="
-                                              (:audio-channels @config/settings))
+                                              (config/setting :audio-channels))
                          :user-agent "vr_shout/0.2.0"
                          ;; :content-type "application/ogg"
                          :ice-name "VR Server Name"
