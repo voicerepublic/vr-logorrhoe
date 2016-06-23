@@ -61,8 +61,7 @@
   {})
 
 (defn- poll []
-  (println "poll")
-  ;; Since the poll also replaces the heartbeat it is a http put.
+  ;; Since the poll also replaces the heartbeat it is a HTTP PUT.
   (let [data (-> (client/put (polling-endpoint) (polling-options))
                  :body
                  (json/parse-string keywordize))]
@@ -72,32 +71,16 @@
 (defn- polling-interval []
   (* 1000 (state :heartbeat-interval)))
 
-(defn- infinitly [ms f & args]
+(defn- while-call-throttled [test ms f & args]
   (future
-    (loop [] ;; TODO replace with `while (state :polling)`
-      (apply f args)
-      (Thread/sleep ms)
-      (recur))))
+    (while (test)
+      (do
+        (apply f args)
+        (Thread/sleep ms)))))
 
 (defn start-polling []
-  (setting :polling true)
-  (infinitly 5000 poll))
+  (state :polling true)
+  (while-call-throttled #(state :polling) (polling-interval) poll))
 
-;; (defn- tick
-;;   "Call f with args every ms. First call will be after ms"
-;;   [ms f & args]
-;;   (future
-;;     (println "1")
-;;     (doseq [g (repeatedly #(apply f args))]
-;;       (println "2")
-;;       (Thread/sleep ms)
-;;       (println "3")
-;;       (g))))
-
-;; (defn- bounce [ms f]
-;;   (future
-;;     (let [bouncer (fn []
-;;                       (f)
-;;                       (Thread/sleep ms)
-;;                       bouncer)]
-;;       (trampoline bouncer))))
+(defn stop-polling []
+  (state :polling false))
