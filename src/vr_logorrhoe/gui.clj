@@ -7,6 +7,7 @@
              [core :refer :all]
              [font :refer :all]]
             [vr-logorrhoe
+             [checks :as checks]
              [config :as config]
              [shout :as shout]
              [recorder :as recorder]
@@ -35,6 +36,12 @@
                      selected-element-pos))
 
 ;; Menu Action Helpers
+(def check-update-action (action
+                          :name "Check for Updates"
+                          :handler (fn [e]
+                                     (checks/check-version)
+                                     (alert "Your software is up to date."))))
+
 (def help-action (action
                   :handler (fn [e] (browse-url "http://voicerepublic.com"))
                   :name "Documentation"
@@ -58,8 +65,10 @@
 (def f (frame :title "VR - *re:stream*"
               :menubar
               (menubar :items
-                       [(menu :text "File" :items [backup-folder-action exit-action])
-                        (menu :text "Help" :items [help-action])])))
+                       [(menu :text "File" :items [backup-folder-action
+                                                   exit-action])
+                        (menu :text "Help" :items [check-update-action
+                                                   help-action])])))
 
 (defn start []
   "Starts the GUI"
