@@ -45,14 +45,15 @@
                   :name "Exit"
                   :tip  "Close this window"))
 
-(def backup-folder-action (action
-                           :handler (fn [e]
-                                      (choose-file :remember-directory? true
-                                                   :selection-mode :dirs-only
-                                                   :success-fn (fn [fc file]
-                                                                 (config/setting :backup-folder (.getAbsolutePath file)))))
-                           :name "Choose Backup Folder"
-                           :tip  "Choose Backup Folder"))
+(def backup-folder-action
+  (action
+   :handler (fn [e]
+              (choose-file :remember-directory? true
+                           :selection-mode :dirs-only
+                           :success-fn (fn [fc file]
+                                         (config/setting :backup-folder (.getAbsolutePath file)))))
+   :name "Choose Backup Folder"
+   :tip  "Choose Backup Folder"))
 
 ;; Setup the one frame to hold the whole GUI
 (def f (frame :title "VR - *re:stream*"
@@ -61,49 +62,69 @@
                        [(menu :text "File" :items [backup-folder-action exit-action])
                         (menu :text "Help" :items [help-action])])))
 
+
+(def ^:private logo (label :icon (:logo icons)))
+
+(def ^:private title (label :text "VR - *re:stream*"
+                            :font (font :name :monospaced
+                                        :style #{:bold}
+                                        :size 34)))
+
+(def ^:private record-button (button :text "Record"))
+
+(def ^:private audio-inputs (listbox :model (recorder/get-mixer-names)))
+
+(def ^:private audio-sample-freq-combo-box (create-combo-box))
+
+(def ^:private audio-sample-freq (left-right-split
+                                  (label :text "Frequency")
+                                  audio-sample-freq-combo-box))
+
+(def ^:private audio-sample-size-combo-box (create-combo-box))
+
+(def ^:private audio-sample-size (left-right-split
+                                  (label :text "Sample Size")
+                                  audio-sample-size-combo-box))
+
+(def ^:private audio-channels-combo-box (create-combo-box))
+
+(def ^:private audio-channels (left-right-split
+                               (label :text "Channels")
+                               audio-channels-combo-box))
+
+(def ^:private audio-format (flow-panel
+                             :hgap 20 :items
+                             [audio-sample-freq
+                              audio-sample-size
+                              audio-channels]))
+
+(def ^:private server-field (text (config/setting :host)))
+
+(def ^:private password-field (text (config/setting :password)))
+
+(def ^:private mountpoint-field (text (config/setting :mountpoint)))
+
+(def ^:private left-main (top-bottom-split
+                          (top-bottom-split
+                           audio-format
+                           (horizontal-panel
+                            :items [server-field
+                                    password-field
+                                    mountpoint-field]))
+                          (scrollable audio-inputs)))
+
+(def ^:private main (left-right-split
+                     left-main
+                     record-button
+                     :divider-location
+                     (/ 1 1.5)))
+
 (defn start []
   "Starts the GUI"
-  (invoke-later
-   (-> f pack! show! ))
+  (invoke-later (-> f pack! show! ))
   (config f :title)
 
-  (let [logo (label
-              :icon (:logo icons))
-        title (label
-               :text "VR - *re:stream*"
-               :font (font :name :monospaced
-                           :style #{:bold}
-                           :size 34))
-        record-button (button :text "Record")
-        audio-inputs (listbox :model (recorder/get-mixer-names))
-        ;; TODO: Add the other audio-format configuration parameters
-        ;; -> int channels, boolean signed, boolean bigEndian
-        audio-sample-freq-combo-box (create-combo-box)
-        audio-sample-freq (left-right-split (label :text "Frequency")
-                                            audio-sample-freq-combo-box)
-        audio-sample-size-combo-box (create-combo-box)
-        audio-sample-size (left-right-split (label :text "Sample Size")
-                                            audio-sample-size-combo-box)
-        audio-channels-combo-box (create-combo-box)
-        audio-channels (left-right-split (label :text "Channels")
-                                            audio-channels-combo-box)
-        audio-format (flow-panel
-                      :hgap 20
-                      :items [audio-sample-freq
-                              audio-sample-size
-                              audio-channels])
-        server-field (text (config/setting :host))
-        password-field (text (config/setting :password))
-        mountpoint-field (text (config/setting :mountpoint))
-        left-main (top-bottom-split
-                   (top-bottom-split audio-format
-                                     (horizontal-panel :items [server-field
-                                                               password-field
-                                                               mountpoint-field]))
-                   (scrollable audio-inputs))
-
-        main (left-right-split left-main record-button :divider-location (/ 1 1.5))
-        freq-col ["22050" "44100" "48000"]
+  (let [freq-col ["22050" "44100" "48000"]
         channels-col ["1" "2"]
         sample-size-col ["16" "24" "32"]]
 
@@ -123,10 +144,10 @@
 
     ;; Set up the GUI layout
     (config! f :content (border-panel
-                         :north (horizontal-panel :items [logo (label :text "       ") title])
+                         :north (horizontal-panel
+                                 :items [logo (label :text "       ") title])
                          :south (label :text "Brought to you via voicerepublic.com")
-                         :center main
-                         :vgap 5 :hgap 5 :border 5))
+                         :center main :vgap 5 :hgap 5 :border 5))
 
     ;; Register actions
     (listen server-field
@@ -147,32 +168,33 @@
               (when-let [t (text mountpoint-field)]
                 (shout/set-mountpoint t))))
 
-    (listen audio-inputs :selection (fn[e]
-                                      (when-let [s (selection e)]
-                                        (config/setting :recording-device s))))
-
-    (listen audio-channels-combo-box :selection (fn[e]
-                                        (when-let [s (selection e)]
-                                          (config/setting :audio-channels s))))
-
-    (listen audio-sample-freq-combo-box :selection (fn[e]
-                                                     (when-let [s (selection e)]
-                                                       (config/setting :sample-freq s))))
-
-    (listen audio-sample-size-combo-box :selection (fn[e]
-                                                     (when-let [s (selection e)]
-                                                       (config/setting :sample-size s))))
-    (listen record-button
-            :mouse-clicked
+    (listen audio-inputs :selection
             (fn[e]
+              (when-let [s (selection e)]
+                (config/setting :recording-device s))))
 
+    (listen audio-channels-combo-box :selection
+            (fn[e]
+              (when-let [s (selection e)]
+                (config/setting :audio-channels s))))
+
+    (listen audio-sample-freq-combo-box :selection
+            (fn[e]
+              (when-let [s (selection e)]
+                (config/setting :sample-freq s))))
+
+    (listen audio-sample-size-combo-box :selection
+            (fn[e]
+              (when-let [s (selection e)]
+                (config/setting :sample-size s))))
+
+    (listen record-button :mouse-clicked
+            (fn[e]
               (config/state :record-button not)
-
               (config! record-button
                        :text (if (config/state :record-button)
                                "Stop"
                                "Record"))
-
               (future
                 (if (config/state :record-button)
                   (recorder/start-recording)
