@@ -32,8 +32,8 @@
                      :sample-size "16"
                      :audio-channels "2"
                      :host "127.0.0.1"
-                     :password "thisisnotagoodpassword"
-                     :mountpoint "i_am_a_mountpoint"
+                     :password "********"
+                     :mountpoint "live"
                      :identifier (utils/generate-identifier)})
 
 (defn- write-default-config-file []

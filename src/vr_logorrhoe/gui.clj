@@ -3,207 +3,206 @@
              [browse :refer [browse-url]]
              [io :as io]]
             [seesaw
-             [chooser :refer :all]
              [core :refer :all]
-             [font :refer :all]]
+             [font :refer :all]
+             [chooser :refer [choose-file]]
+             [mig :refer [mig-panel]]]
             [vr-logorrhoe
              [config :as config]
              [shout :as shout]
              [recorder :as recorder]
              [utils :as utils :refer [log]]]))
 
-;; Declare initial state
+;; --- dev notes
+(comment
+  (start)
+  (and (load-file "src/vr_logorrhoe/gui.clj") (start))
+  )
+
+;; Table of Contents
+;;
+;; * state
+;; * data
+;; * helpers (generic parameterized component factories)
+;; * components (specific component factories)
+;; * handlers
+;; * actions
+;; * setup
+;; * dev notes
+
+
+;; --- state
+
 (config/state :record-button false)
+
+
+;; --- data
+
+(def title "RE:STREAM")
 
 (def icons {:logo (io/file (utils/conj-path config/assets-path "logo.png"))})
 
-;; Before any UI is created, tell seesaw to make things look as native
-;; as possible
-(native!)
+(def source-options (recorder/get-mixer-names))
 
-;; Helper functions
-(defn- create-combo-box []
-  "Creates a new JComboBox seesaw-widget"
-  (seesaw.core/make-widget (new javax.swing.JComboBox)))
+(def frequency-options ["22050" "44100" "48000"])
 
-(defn- populate-combo-box [combo-box col selected-element-pos]
-  "Populates a `combo-box` with a collection `col` and pre-selects the
-  element at position `selected-element-pos`"
-  (doall
-   (map #(.addItem combo-box %) col))
-  (.setSelectedIndex combo-box
-                     selected-element-pos))
+(def channels-options ["1" "2"])
 
-;; Menu Action Helpers
-(def help-action (action
-                  :handler (fn [e] (browse-url "http://voicerepublic.com"))
-                  :name "Documentation"
-                  :tip  "Open Documentation"))
+(def sample-size-options ["16" "24" "32"])
 
-(def exit-action (action
-                  :handler (fn [e] (.dispose (to-frame e)))
-                  :name "Exit"
-                  :tip  "Close this window"))
+
+;; --- helpers
+
+(defn- observed-combobox [options value handler]
+  (let [combo (combobox :model options)]
+    (selection! combo value)
+    (listen combo :selection
+            (fn [e] (handler (selection e))))
+    combo))
+
+(defn- observed-text [value handler]
+  (let [field (text value)]
+    (listen field :focus-lost
+            (fn [e] (handler (text field))))
+    field))
+
+;; --- components
+
+(defn- logo-comp []
+  (label :icon (:logo icons)))
+
+(defn- title-comp []
+  (label :text title
+         :font (font :name :monospaced
+                     :style #{:bold}
+                     :size 48)))
+
+(defn- server-comp []
+  (observed-text (config/setting :host)
+                 #(shout/set-host %)))
+
+(defn- password-comp []
+  (observed-text (config/setting :password)
+                 #(shout/set-password %)))
+
+
+(defn- source-comp []
+  (observed-combobox source-options
+                     (config/setting :audio-source)
+                     #(config/setting :audio-source %)))
+
+(defn- frequency-comp []
+  (observed-combobox frequency-options
+                     (config/setting :audio-frequency)
+                     #(config/setting :audio-frequency %)))
+
+(defn- sample-size-comp []
+  (observed-combobox sample-size-options
+                     (config/setting :audio-sample-size)
+                     #(config/setting :audio-sample-size %)))
+
+(defn- channels-comp []
+  (observed-combobox channels-options
+                     (config/setting :audio-channels)
+                     #(config/setting :audio-channels %)))
+
+
+(defn- record-button-comp []
+  (let [btn (button :text "Stream & Record")]
+    (listen btn :mouse-clicked
+            (fn [e]
+              (config/state :record-button not)
+              (config! btn :text (if (config/state :record-button) "Stop" "Stream & Record"))
+              (future (if (config/state :record-button)
+                        (recorder/start-recording)
+                        (recorder/stop-recording)))))
+    btn))
+
+
+(defn- content-comp []
+  (mig-panel :constraints ["" ; layout
+                           "" ; cols
+                           "[][]20[]20[][]20[]"] ; rows
+             :items [[(logo-comp) "span, wrap"] ; TODO fix logo
+                     [(title-comp) "span, wrap, center"]
+
+                     ["Server"]      [(server-comp)        "growx, span 2"]
+                     ["Password"]    [(password-comp)      "growx, span 2, wrap"]
+
+                     ["Source"]      [(source-comp)        "growx, span, wrap"]
+                     ["Frequency"]   [(frequency-comp)     "growx"]
+                     ["Sample Size"] [(sample-size-comp)   "growx"]
+                     ["Channels"]    [(channels-comp)      "growx, wrap"]
+
+                     ["" "span 3"]   [(record-button-comp) "growx, span 3"]]))
+
+
+;; --- handlers
+
+(defn backup-folder-handler [_]
+  (choose-file :remember-directory? true
+               :selection-mode :dirs-only
+               :success-fn (fn [fc file]
+                             (config/setting :backup-folder
+                                             (.getAbsolutePath file)))))
+
+
+;; --- actions
+
+(def exit-action
+  (action :name "Exit"
+          :tip  "Close this window"
+          :handler (fn [e] (.dispose (to-frame e)))))
 
 (def backup-folder-action
-  (action
-   :handler (fn [e]
-              (choose-file :remember-directory? true
-                           :selection-mode :dirs-only
-                           :success-fn (fn [fc file]
-                                         (config/setting :backup-folder (.getAbsolutePath file)))))
-   :name "Choose Backup Folder"
-   :tip  "Choose Backup Folder"))
+  (action :name "Choose Backup Folder"
+          :tip  "Choose Backup Folder"
+          :handler backup-folder-handler))
 
-;; Setup the one frame to hold the whole GUI
-(def f (frame :title "VR - *re:stream*"
-              :menubar
-              (menubar :items
-                       [(menu :text "File" :items [backup-folder-action exit-action])
-                        (menu :text "Help" :items [help-action])])))
+(def help-action
+  (action :name "Documentation"
+          :tip  "Open Documentation"
+          :handler (fn [_] (browse-url "http://voicerepublic.com"))))
 
 
-(def ^:private logo (label :icon (:logo icons)))
+;; --- setup
 
-(def ^:private title (label :text "VR - *re:stream*"
-                            :font (font :name :monospaced
-                                        :style #{:bold}
-                                        :size 34)))
+(defn- make-frame []
+  (frame :title title
+         :menubar (menubar
+                   :items
+                   [(menu :text "File"
+                          :items [backup-folder-action
+                                  exit-action])
+                    (menu :text "Help"
+                          :items [help-action])])))
 
-(def ^:private record-button (button :text "Record"))
-
-(def ^:private audio-inputs (listbox :model (recorder/get-mixer-names)))
-
-(def ^:private audio-sample-freq-combo-box (create-combo-box))
-
-(def ^:private audio-sample-freq (left-right-split
-                                  (label :text "Frequency")
-                                  audio-sample-freq-combo-box))
-
-(def ^:private audio-sample-size-combo-box (create-combo-box))
-
-(def ^:private audio-sample-size (left-right-split
-                                  (label :text "Sample Size")
-                                  audio-sample-size-combo-box))
-
-(def ^:private audio-channels-combo-box (create-combo-box))
-
-(def ^:private audio-channels (left-right-split
-                               (label :text "Channels")
-                               audio-channels-combo-box))
-
-(def ^:private audio-format (flow-panel
-                             :hgap 20 :items
-                             [audio-sample-freq
-                              audio-sample-size
-                              audio-channels]))
-
-(def ^:private server-field (text (config/setting :host)))
-
-(def ^:private password-field (text (config/setting :password)))
-
-(def ^:private mountpoint-field (text (config/setting :mountpoint)))
-
-(def ^:private left-main (top-bottom-split
-                          (top-bottom-split
-                           audio-format
-                           (horizontal-panel
-                            :items [server-field
-                                    password-field
-                                    mountpoint-field]))
-                          (scrollable audio-inputs)))
-
-(def ^:private main (left-right-split
-                     left-main
-                     record-button
-                     :divider-location
-                     (/ 1 1.5)))
+(defn- dimension
+  "Returns a dimension `[x :by y]` of a given component, adds options
+  x and y to width resp. height if provided."
+  [panel & {:keys [x y] :or {x 0 y 0}}]
+  (let [dim (.getPreferredSize panel)]
+    [(+ x (.-width dim)) :by (+ y (.-height dim))]))
 
 (defn start []
   "Starts the GUI"
-  (invoke-later (-> f pack! show! ))
-  (config f :title)
+  ;; Before any UI is created, tell seesaw to make things look as native
+  ;; as possible
+  (native!)
 
-  (let [freq-col ["22050" "44100" "48000"]
-        channels-col ["1" "2"]
-        sample-size-col ["16" "24" "32"]]
+  (let [the-frame (make-frame)
+        content (content-comp)]
+    (invoke-later (-> the-frame pack! show!))
 
-    (selection! audio-inputs (config/setting :recording-device))
+    ;; TODO to add a status bar don't use this but "dock south in mig"
+    ;;(config! the-frame :content (border-panel
+    ;;                     :north (horizontal-panel
+    ;;                             :items [logo (label :text "       ") title])
+    ;;                     :south (label :text "Brought to you via voicerepublic.com")
+    ;;                     :center main :vgap 5 :hgap 5 :border 5))
 
-    (populate-combo-box audio-channels-combo-box
-                        channels-col
-                        (utils/index-of (config/setting :audio-channels) channels-col))
+    (config! the-frame :content content)
 
-    (populate-combo-box audio-sample-freq-combo-box
-                        freq-col
-                        (utils/index-of (config/setting :sample-freq) freq-col))
-
-    (populate-combo-box audio-sample-size-combo-box
-                        sample-size-col
-                        (utils/index-of (config/setting :sample-size) sample-size-col))
-
-    ;; Set up the GUI layout
-    (config! f :content (border-panel
-                         :north (horizontal-panel
-                                 :items [logo (label :text "       ") title])
-                         :south (label :text "Brought to you via voicerepublic.com")
-                         :center main :vgap 5 :hgap 5 :border 5))
-
-    ;; Register actions
-    (listen server-field
-            :focus-lost
-            (fn [e]
-              (when-let [t (text server-field)]
-                (shout/set-host t))))
-
-    (listen password-field
-            :focus-lost
-            (fn [e]
-              (when-let [t (text password-field)]
-                (shout/set-password t))))
-
-    (listen mountpoint-field
-            :focus-lost
-            (fn [e]
-              (when-let [t (text mountpoint-field)]
-                (shout/set-mountpoint t))))
-
-    (listen audio-inputs :selection
-            (fn[e]
-              (when-let [s (selection e)]
-                (config/setting :recording-device s))))
-
-    (listen audio-channels-combo-box :selection
-            (fn[e]
-              (when-let [s (selection e)]
-                (config/setting :audio-channels s))))
-
-    (listen audio-sample-freq-combo-box :selection
-            (fn[e]
-              (when-let [s (selection e)]
-                (config/setting :sample-freq s))))
-
-    (listen audio-sample-size-combo-box :selection
-            (fn[e]
-              (when-let [s (selection e)]
-                (config/setting :sample-size s))))
-
-    (listen record-button :mouse-clicked
-            (fn[e]
-              (config/state :record-button not)
-              (config! record-button
-                       :text (if (config/state :record-button)
-                               "Stop"
-                               "Record"))
-              (future
-                (if (config/state :record-button)
-                  (recorder/start-recording)
-                  (recorder/stop-recording))))))
-
-  ;; Set size after everything else is in the frame, otherwise the
-  ;; size in Windows will be set to 0x0 anyway.
-  (config! f :size [900 :by 500]))
-
-
-;; (vr-logorrhoe.core/-main)
-;; (start)
+    ;; Set size after everything else is in the frame, otherwise the
+    ;; size in Windows will be set to 0x0 anyway.
+    (config! the-frame :size (dimension content :y 30))))
