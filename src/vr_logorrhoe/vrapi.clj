@@ -23,6 +23,8 @@
     (debug "knock returned" data)
     (state :endpoint (:endpoint data))
     (state :log-level log-level)
+    ;; TODO this could be handled somewhere else where it belongs by
+    ;; watching the state
     (timbre/set-level! log-level)))
 
 ;; ------------------------------ registering (rest)
@@ -49,3 +51,36 @@
                  (json/parse-string keywordize))]
     (debug "register returned" data)
     (merge-state! data)))
+
+;; ------------------------------ polling (rest)
+
+(defn- polling-endpoint []
+  (str (state :endpoint) "/" (setting :identifier)))
+
+(defn- polling-options []
+  {})
+
+(defn- poll []
+  ;; Since the poll also replaces the heartbeat it is a HTTP PUT.
+  (let [data (-> (client/put (polling-endpoint) (polling-options))
+                 :body
+                 (json/parse-string keywordize))]
+    (debug "poll returned" data)
+    (merge-state! data)))
+
+(defn- polling-interval []
+  (* 1000 (state :heartbeat-interval)))
+
+(defn- while-call-throttled [test ms f & args]
+  (future
+    (while (test)
+      (do
+        (apply f args)
+        (Thread/sleep ms)))))
+
+(defn start-polling []
+  (state :polling true)
+  (while-call-throttled #(state :polling) (polling-interval) poll))
+
+(defn stop-polling []
+  (state :polling false))
