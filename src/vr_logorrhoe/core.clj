@@ -2,6 +2,7 @@
   (:gen-class)
   (:require [vr-logorrhoe
              [vrapi :as vrapi]
+             [logging :as logging]
              [checks :as checks]
              [gui :as gui]
              [config :as config]
@@ -44,8 +45,9 @@
   (setup-assets))
 
 (defn -main [& args]
+  (logging/setup!)
   (checks/check-connectivity)
-  ;;(checks/check-version)
+  (checks/check-version)
   (vrapi/knock)
   (vrapi/register)
   (vrapi/start-polling)
