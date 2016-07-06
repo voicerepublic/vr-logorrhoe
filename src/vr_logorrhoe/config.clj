@@ -25,7 +25,8 @@
 
 (def assets-path (utils/conj-path app-directory "assets"))
 
-(def default-config {:recording-device ""
+(def default-config {:config-version 1
+                     :recording-device ""
                      :sample-freq "44100"
                      :log-file (utils/conj-path app-directory "messages.log")
                      :log-level :info
