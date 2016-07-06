@@ -1,5 +1,6 @@
 (ns vr-logorrhoe.utils
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [taoensso.timbre :as timbre :refer (info)])
   (:import [java.io BufferedReader InputStreamReader]))
 
 (def util-app-state (atom {}))
@@ -11,8 +12,7 @@
 (defn log [& msg]
   "Prints a message to stdout, also writes to a log file"
   (let [log-msg (apply str msg)]
-    (prn log-msg)
-    (spit (:logger-path @util-app-state) (str log-msg "\n") :append true)))
+    (info log-msg)))
 
 (defn get-declared-methods [obj]
   "Get declared methods on `obj` through Java Reflection"

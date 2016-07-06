@@ -65,7 +65,13 @@ additional credibility.
 Java has a Class for creating and managing Sub-Processes called
 [[http://docs.oracle.com/javase/8/docs/api/java/lang/ProcessBuilder.html][ProcessBuilder]]. I did some initial tests, but /shell2/ prevailed.
 
-** shout protocol
+** Icecast
+
+*** Stats
+- http://0.0.0.0/admin/stats.xml
+- http://0.0.0.0/status-json.xsl
+
+*** Protocol
 Reverse engineered streaming of Ogg Vorbis files:
 
 #+BEGIN_SRC clojure
