@@ -52,4 +52,4 @@
   (vrapi/register)
   (bootstrap)
   (vrapi/start-polling)
-  (gui/start) )
+  (gui/start))
