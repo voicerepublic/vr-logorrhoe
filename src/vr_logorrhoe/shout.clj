@@ -5,25 +5,18 @@
    [clj-http.client :as client]))
 
 (defn- stream-endpoint []
-  (str "http://" (config/setting :host) "/" (config/setting :mountpoint)))
-
-(defn set-host [host]
-  (config/setting :host host))
-
-(defn set-password [host]
-  (config/setting :password host))
-
-(defn set-mountpoint [host]
-  (config/setting :mountpoint host))
-
-;; TODO: Actually use the port
-(defn set-port [host]
-  (config/setting :port host))
+  (str "http://"
+       (get-in (config/state :venue) [:icecast :public-ip-address])
+       ":"
+       (get-in (config/state :venue) [:icecast :port])
+       "/"
+       (get-in (config/state :venue) [:icecast :mount-point])))
 
 (defn stream [input-stream]
   (client/put (stream-endpoint)
               {
-               :basic-auth ["source" (config/setting :password)]
+               :basic-auth ["source" (get-in (config/state :venue)
+                                             [:icecast :source-password])]
                :multipart [{:name "/foo"
                             :content input-stream
                             :length -1}]

@@ -50,6 +50,6 @@
   (checks/check-version)
   (vrapi/knock)
   (vrapi/register)
-  (vrapi/start-polling)
   (bootstrap)
-  (gui/start))
+  (vrapi/start-polling)
+  (gui/start) )

@@ -27,15 +27,12 @@
 
 (def default-config {:config-version 1
                      :recording-device ""
-                     :sample-freq "44100"
                      :log-file (utils/conj-path app-directory "messages.log")
                      :log-level :info
                      :backup-folder app-directory
                      :sample-size "16"
                      :audio-channels "2"
-                     :host "127.0.0.1"
-                     :password "********"
-                     :mountpoint "live"
+                     :sample-freq "44100"
                      :identifier (utils/generate-identifier)})
 
 (defn- write-default-config-file []

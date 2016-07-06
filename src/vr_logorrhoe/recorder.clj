@@ -100,7 +100,7 @@
             ;; Current sample
             mic-sample-bbyte (. ByteBuffer (wrap mic-sample-buffer))]
 
-        (config/state :audio-samples-count inc)
+        (config/state :audio-samples-count (inc (config/state :audio-samples-count)))
 
         ;; NOTE: Maybe refactor mic-sample-buffer
         ;; vs. mic-sample-bbyte. The second one might not be needed
@@ -120,8 +120,9 @@
             (log "Start encoding!")
             ;; TODO: Duplicate input-stream so that it can be shouted
             ;; and persisted locally.
-            (encode audio-input-stream #(;(io/copy % (io/file "tmp.mp3"))
-                                         (shout/stream %))))))
+            (encode audio-input-stream #(shout/stream %
+                                        ;(io/copy % (io/file "tmp.mp3"))
+                                         )))))
 
       ;; TODO: Call the `drain` method to drain the recorder-line when
       ;; the recording stops. Otherwise the recorded data might seem
@@ -166,8 +167,6 @@
 
   (log "stop-recording")
   (config/state :recording false))
-
-
 
 (comment
   (try

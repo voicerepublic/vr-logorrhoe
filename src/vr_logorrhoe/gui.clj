@@ -77,29 +77,20 @@
                      :style #{:bold}
                      :size 48)))
 
-(defn- server-comp []
-  (observed-text (config/setting :host)
-                 #(shout/set-host %)))
-
-(defn- password-comp []
-  (observed-text (config/setting :password)
-                 #(shout/set-password %)))
-
-
 (defn- source-comp []
   (observed-combobox source-options
-                     (config/setting :audio-source)
-                     #(config/setting :audio-source %)))
+                     (config/setting :recording-device)
+                     #(config/setting :recording-device %)))
 
 (defn- frequency-comp []
   (observed-combobox frequency-options
-                     (config/setting :audio-frequency)
-                     #(config/setting :audio-frequency %)))
+                     (config/setting :sample-freq)
+                     #(config/setting :sample-freq %)))
 
 (defn- sample-size-comp []
   (observed-combobox sample-size-options
-                     (config/setting :audio-sample-size)
-                     #(config/setting :audio-sample-size %)))
+                     (config/setting :sample-size)
+                     #(config/setting :sample-size %)))
 
 (defn- channels-comp []
   (observed-combobox channels-options
@@ -111,7 +102,7 @@
   (let [btn (button :text "Stream & Record")]
     (listen btn :mouse-clicked
             (fn [e]
-              (config/state :record-button not)
+              (config/state :record-button (not (config/state :record-button)))
               (config! btn :text (if (config/state :record-button) "Stop" "Stream & Record"))
               (future (if (config/state :record-button)
                         (recorder/start-recording)
@@ -122,12 +113,9 @@
 (defn- content-comp []
   (mig-panel :constraints ["" ; layout
                            "" ; cols
-                           "[][]20[]20[][]20[]"] ; rows
+                           "[][]20[][]20[]"] ; rows
              :items [[(logo-comp) "span, wrap"] ; TODO fix logo
                      [(title-comp) "span, wrap, center"]
-
-                     ["Server"]      [(server-comp)        "growx, span 2"]
-                     ["Password"]    [(password-comp)      "growx, span 2, wrap"]
 
                      ["Source"]      [(source-comp)        "growx, span, wrap"]
                      ["Frequency"]   [(frequency-comp)     "growx"]
@@ -205,4 +193,4 @@
 
     ;; Set size after everything else is in the frame, otherwise the
     ;; size in Windows will be set to 0x0 anyway.
-    (config! the-frame :size (dimension content :y 30))))
+    (config! the-frame :size (dimension content :y 60))))
