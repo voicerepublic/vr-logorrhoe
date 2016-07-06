@@ -1,6 +1,7 @@
 (ns vr-logorrhoe.utils
   (:require [clojure.java.io :as io])
-  (:import [java.io BufferedReader InputStreamReader]))
+  (:import [java.io BufferedReader InputStreamReader]
+           [java.util Properties]))
 
 (def util-app-state (atom {}))
 
@@ -89,3 +90,11 @@
 (defn die [& args]
   (apply println args)
   (System/exit 1))
+
+(defn project-version [groupid artifact]
+  (-> (doto (Properties.)
+        (.load (-> "META-INF/maven/%s/%s/pom.properties"
+                   (format groupid artifact)
+                   (io/resource)
+                   (io/reader))))
+      (.get "version")))
