@@ -25,15 +25,18 @@
 
 (def assets-path (utils/conj-path app-directory "assets"))
 
-(def default-config {:recording-device ""
+(def default-config {:config-version 1
+                     :recording-device ""
                      :sample-freq "44100"
                      :log-file (utils/conj-path app-directory "messages.log")
+                     :log-level :info
                      :backup-folder app-directory
                      :sample-size "16"
                      :audio-channels "2"
                      :host "127.0.0.1"
                      :password "thisisnotagoodpassword"
-                     :mountpoint "i_am_a_mountpoint"})
+                     :mountpoint "i_am_a_mountpoint"
+                     :identifier (utils/generate-identifier)})
 
 (defn- write-default-config-file []
   "Check whether there's a *re-stream* config folder and config
@@ -67,6 +70,12 @@
    (swap! app-state assoc key val))
   ([key]
    (key @app-state)))
+
+(defn merge-state!
+  "Merges the given map into the existing app-state, overwriting
+  any existing values."
+  [new-state]
+  (swap! app-state merge new-state))
 
 ;; Initially set the logger path
 (utils/set-logger-path (:log-file @settings))
