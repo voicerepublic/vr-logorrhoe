@@ -87,7 +87,10 @@
 
   (config/state :audio-samples-count 0)
 
-  (let [raw-file (.getChannel (java.io.FileOutputStream. (utils/conj-path (config/setting :backup-folder) "tmp.wav")))
+  (let [now-in-millis (. System currentTimeMillis)
+        raw-file-name (str "recording-" now-in-millis ".wav")
+        raw-file-path (utils/conj-path (config/setting :backup-folder) raw-file-name)
+        raw-file (.getChannel (java.io.FileOutputStream. raw-file-path))
         audio-input-stream (new PipedInputStream)
         audio-output-stream (PipedOutputStream. audio-input-stream)]
 
