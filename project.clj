@@ -7,7 +7,8 @@
                  [com.climate/java.shell2 "0.1.0"]
                  [clj-http "2.1.0"]
                  [cheshire "5.6.2"]
-                 [org.clojure/clojure "1.8.0"]]
+                 [org.clojure/clojure "1.8.0"]
+                 [com.taoensso/timbre "4.4.0"]]
   :aot [vr-logorrhoe.core]
   :main vr-logorrhoe.core
   :repositories [["java.net" "http://download.java.net/maven/2"]

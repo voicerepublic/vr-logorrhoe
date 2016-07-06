@@ -1,7 +1,11 @@
 (ns vr-logorrhoe.core
   (:gen-class)
   (:require [vr-logorrhoe
+<<<<<<< HEAD
              [vrapi :as vrapi]
+=======
+             [logging :as logging]
+>>>>>>> 102bf82298af705c6165c319eb17bcf6ab2f36f1
              [checks :as checks]
              [gui :as gui]
              [config :as config]
@@ -44,8 +48,9 @@
   (setup-assets))
 
 (defn -main [& args]
+  (logging/setup!)
   (checks/check-connectivity)
-  ;;(checks/check-version)
+  (checks/check-version)
   (vrapi/knock)
   (vrapi/register)
   (bootstrap)
