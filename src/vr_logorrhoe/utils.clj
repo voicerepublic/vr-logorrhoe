@@ -91,15 +91,18 @@
   (apply println args)
   (System/exit 1))
 
-<<<<<<< HEAD
-(defn project-version [groupid artifact]
-  (-> (doto (Properties.)
-        (.load (-> "META-INF/maven/%s/%s/pom.properties"
-                   (format groupid artifact)
-                   (io/resource)
-                   (io/reader))))
+(defn project-namespace []
+  "Returns `vr-logorrhoe` for the ns `vr-logorrhoe.utils`"
+  (first (clojure.string/split (str (ns-name *ns*)) #"\.")))
+
+(defn project-version []
+  (let [namespace (project-namespace)]
+    (-> (doto (Properties.)
+          (.load (-> "META-INF/maven/%s/%s/pom.properties"
+                     (format namespace namespace)
+                     (io/resource)
+                     (io/reader)))))
       (.get "version")))
-=======
 
 (defn- generate-uuid []
   (str (java.util.UUID/randomUUID)))
@@ -112,4 +115,3 @@
 
 (defn generate-identifier []
   (str (user-name) "@" (host-name) ":" (generate-uuid)))
->>>>>>> master
