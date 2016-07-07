@@ -11,7 +11,7 @@
              [config :as config]
              [shout :as shout]
              [recorder :as recorder]
-             [utils :as utils :refer [log]]]))
+             [utils :as utils :refer [log project-version]]]))
 
 ;; --- dev notes
 (comment
@@ -113,9 +113,10 @@
 (defn- content-comp []
   (mig-panel :constraints ["" ; layout
                            "" ; cols
-                           "[][]20[][]20[]"] ; rows
+                           "[][][]20[][]20[]"] ; rows
              :items [[(logo-comp) "span, wrap"] ; TODO fix logo
                      [(title-comp) "span, wrap, center"]
+                     [(project-version) "span, wrap, center"]
 
                      ["Source"]      [(source-comp)        "growx, span, wrap"]
                      ["Frequency"]   [(frequency-comp)     "growx"]

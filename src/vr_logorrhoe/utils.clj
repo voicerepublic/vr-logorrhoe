@@ -1,6 +1,7 @@
 (ns vr-logorrhoe.utils
   (:require [clojure.java.io :as io]
-            [taoensso.timbre :as timbre :refer (info)])
+            [taoensso.timbre :as timbre :refer (info)]
+            [clojure.string :as str])
   (:import [java.io BufferedReader InputStreamReader]
            [java.util Properties]))
 
@@ -96,13 +97,13 @@
   (first (clojure.string/split (str (ns-name *ns*)) #"\.")))
 
 (defn project-version []
-  (let [namespace (project-namespace)]
+  (let [namespace (str/replace (project-namespace) #"-" "_")]
     (-> (doto (Properties.)
           (.load (-> "META-INF/maven/%s/%s/pom.properties"
                      (format namespace namespace)
                      (io/resource)
-                     (io/reader)))))
-      (.get "version")))
+                     (io/reader))))
+        (.get "version"))))
 
 (defn- generate-uuid []
   (str (java.util.UUID/randomUUID)))
