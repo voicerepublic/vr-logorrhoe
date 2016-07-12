@@ -1,7 +1,7 @@
 (ns vr-logorrhoe.utils
   (:require [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer (info)])
-  (:import [java.io BufferedReader InputStreamReader]
+  (:import [java.io BufferedReader InputStreamReader ByteArrayInputStream ByteArrayOutputStream]
            [java.util Properties]))
 
 (def util-app-state (atom {}))
@@ -115,3 +115,20 @@
 
 (defn generate-identifier []
   (str (user-name) "@" (host-name) ":" (generate-uuid)))
+
+(defn duplicate-input-stream [input-stream]
+  "Takes any input-stream and returns two clones as ByteArrayInputStream"
+  (prn "----------------- STEP 0 -------------------")
+  (let [output-stream (ByteArrayOutputStream.)
+        buffer (make-array Byte 1024)]
+    (prn "Step 1")
+    (loop [length (.read input-stream buffer)]
+      (when length
+        (prn (str "Length: " length))
+        (.write output-stream buffer 0 length)))
+    (prn "Flushing")
+    (.flush output-stream)
+    (let [is1 (ByteArrayInputStream. (.toByteArray output-stream))
+          is2 (ByteArrayInputStream. (.toByteArray output-stream))]
+      (prn "Created new input streams and returning")
+      [is1, is2])))

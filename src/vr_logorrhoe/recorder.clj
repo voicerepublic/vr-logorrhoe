@@ -120,9 +120,9 @@
             (log "Start encoding!")
             ;; TODO: Duplicate input-stream so that it can be shouted
             ;; and persisted locally.
-            (encode audio-input-stream #(shout/stream %
-                                        ;(io/copy % (io/file "tmp.mp3"))
-                                         )))))
+            (encode audio-input-stream #(let [[is1 is2] (utils/duplicate-input-stream %)]
+                                              (shout/stream is1)
+                                              (io/copy is1 (io/file "tmp.mp3")))))))
 
       ;; TODO: Call the `drain` method to drain the recorder-line when
       ;; the recording stops. Otherwise the recorded data might seem
