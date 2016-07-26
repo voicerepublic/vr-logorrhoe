@@ -114,4 +114,4 @@
   (or (.. java.net.InetAddress getLocalHost getHostName) "unknown"))
 
 (defn generate-identifier []
-  (str (user-name) "@" (host-name) ":" (generate-uuid)))
+  (str (user-name) "@" (clojure.string/replace host-name "." "-") ":" (generate-uuid)))
