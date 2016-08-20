@@ -55,8 +55,7 @@
 ;; ------------------------------ polling (rest)
 
 (defn- polling-endpoint []
-  ;; https://voicerepublic.com/polling/devices/:identifier
-  (str (state :polling-endpoint) "/" (setting :identifier)))
+  (str (state :endpoint) "/" (setting :identifier)))
 
 (defn- polling-options []
   {})
