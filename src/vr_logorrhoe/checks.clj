@@ -3,7 +3,7 @@
             [seesaw.core :as seesaw]
             [clj-http.client :as client]))
 
-
+;; TODO this endpoint is deprecated use /versions/restream instead, it just returns a number
 (def versions-endpoint "https://voicerepublic.com/versions.edn")
 
 ;; ------------------------------ connectivity
