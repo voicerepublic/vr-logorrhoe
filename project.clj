@@ -8,7 +8,9 @@
                  [clj-http "2.1.0"]
                  [cheshire "5.6.2"]
                  [org.clojure/clojure "1.8.0"]
-                 [com.taoensso/timbre "4.4.0"]]
+                 [com.taoensso/timbre "4.4.0"]
+                 [com.github.dblock/oshi-core "3.2"]
+                 [im.chit/hara.object "2.4.4"]]
   :aot [vr-logorrhoe.core]
   :main vr-logorrhoe.core
   :repositories [["java.net" "http://download.java.net/maven/2"]
